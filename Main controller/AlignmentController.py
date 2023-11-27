@@ -74,7 +74,7 @@ def write_to_arduino(data):
     arduino.write(str.encode(str(data)))
     time.sleep(.5)
     while True:
-        time.sleep(2)
+        time.sleep(1)
         recv = arduino.readline()
         if not recv:
             break
@@ -91,7 +91,7 @@ def telnet_connection(sock, host, port):
 def sendmsg(sock, message):
     sock.send(message.encode())
 
-def move_actuator(axis, data):
+'''def move_actuator(axis, data):
     print("joe")
     stepsToTakeX = convert_pixels2steps(data[XAxisCam0])
     stepsToTakeY = convert_pixels2steps(data[YAxisCam0])
@@ -100,22 +100,21 @@ def move_actuator(axis, data):
     writeData = stepsToTakeX
     write_to_arduino(writeData)
         # rotate plate
-        #rotate(data)
+        #rotate(data)'''
 
 def rotate(data):
     return 0
 
 def test_program():
-    #if not telnet_connection(connOmron, omronController[0], omronController[1]):
-    #    print("Connection error.")
-    #    return 0
+    if not telnet_connection(connOmron, omronController[0], omronController[1]):
+        print("Connection error.")
+        return 0
     
     start_time = time.perf_counter()
-    
-    #sendmsg(connOmron, measure)
-    #test_data = receive_data(connOmron)
-    test_data = ['623.0000', '-1359.0000', '-249.0000', '-1263.0000\r']
-    print(test_data)
+    sendmsg(connOmron, measure)
+    test_data = receive_data(connOmron)
+    #test_data = ['623.0000', '-1359.0000', '-249.0000', '-1263.0000\r']
+    print(test_data[1])
 
     end_time = time.perf_counter()
     measured_time = end_time - start_time
@@ -123,9 +122,16 @@ def test_program():
 
     #stepsToTake = convert_pixels2steps(test_data[measuredData][1])
 
-    #write_to_arduino(abs(stepsToTake))
-    move_actuator(0, test_data)
-    #write_to_arduino(['Y', ['0', '600'], 'X', ['0', '600']])
+    #move_actuator(0, test_data)
+    for i in test_data[1]:
+        write_to_arduino(i)
+    #time.sleep(1)
+    #write_to_arduino(test_data[1][YAxisCam0])
+    #time.sleep(1)
+    #write_to_arduino(test_data[1][XAxisCam2])
+    #time.sleep(1)
+    #write_to_arduino(test_data[1][YAxisCam2])
+    #write_to_arduino(test_data[1][YAxisCam2])
     #write_to_arduino(['Y', ['0', '0'], 'X', ['0', '0']])
 
 test_program()
