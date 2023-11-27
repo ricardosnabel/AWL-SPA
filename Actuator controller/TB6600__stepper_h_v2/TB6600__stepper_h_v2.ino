@@ -12,6 +12,9 @@
 #define enaPinY 2
 #define errLed 13
 
+#define pixelSize 9.922
+#define stepSize 2.5
+
 #define startPosition 0
 
 int stepsToTakeX = -1;
@@ -46,6 +49,11 @@ void setup() {
   stepper_innit(stepperY);
 }
 
+int convert_pixels2steps(float pixels){
+  int stepsToTake = (pixelSize * abs(pixels)) / stepSize;
+  return stepsToTake;
+}
+
 void stepper_innit(AccelStepper stepper){
   stepper.setMaxSpeed(6400);
   stepper.setAcceleration(6400);
@@ -63,23 +71,33 @@ void PulseSignal(int steps, AccelStepper stepper){
 }
 
 void loop() {
+  int status = 0;
+  int index = 0;
+  int *cam;
   if (Serial.available() > 0){
-    int incomingData = Serial.readString().toInt();
-    if (incomingData > 0){
-      dirMotor = true;
-    } else {
-      dirMotor = false;
-    }
-    stepsToTakeX = incomingData;
-    Serial.println(incomingData);
-  } if ((millis() - waitTime) > 5000){
+    cam[index] = Serial.readString().toInt();
+    Serial.println(cam[index]);
+    index++;
+  }
+  switch (status){
+    case 0:
+      break;
+    case 1:
+      break;
+  }
+  
+  /*if ((millis() - waitTime) > 5000){
+    digitalWrite(enaPinX1, true);
     digitalWrite(enaPinX2, true);
+    digitalWrite(enaPinY, true);
   }
   if (onOff && stepsToTakeX >= 0){
+    digitalWrite(enaPinX1, false);
     digitalWrite(enaPinX2, false);
+    digitalWrite(enaPinY, false);
     PulseSignal(stepsToTakeX, stepperX2);
     stepsToTakeX = -1;
     Serial.println(endTime - startTime);
     waitTime = millis();
-  }
+  }*/
 }
