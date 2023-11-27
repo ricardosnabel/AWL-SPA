@@ -92,17 +92,15 @@ def sendmsg(sock, message):
     sock.send(message.encode())
 
 def move_actuator(axis, data):
-    if (((data[measuredData][XAxisCam0] - data[measuredData][XAxisCam2]) <= 5) and ((data[measuredData][YAxisCam0] - data[measuredData][YAxisCam2]) <= 5)):
-        stepsToTakeX = convert_pixels2steps(data[measuredData][XAxisCam0])
-        stepsToTakeY = convert_pixels2steps(data[measuredData][YAxisCam0])
-        writeData = stepsToTakeY
-        write_to_arduino(writeData)
-        writeData = stepsToTakeX
-        write_to_arduino(writeData)
-
-    else:
+    print("joe")
+    stepsToTakeX = convert_pixels2steps(data[XAxisCam0])
+    stepsToTakeY = convert_pixels2steps(data[YAxisCam0])
+    writeData = stepsToTakeY
+    write_to_arduino(writeData)
+    writeData = stepsToTakeX
+    write_to_arduino(writeData)
         # rotate plate
-        rotate(data)
+        #rotate(data)
 
 def rotate(data):
     return 0
