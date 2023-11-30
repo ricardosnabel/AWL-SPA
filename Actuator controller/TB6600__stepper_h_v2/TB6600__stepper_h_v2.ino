@@ -1,25 +1,21 @@
 #include <AccelStepper.h>
 
-
-#define pulPinX2 10
-#define dirPinX2 9
-#define enaPinX2 8
-#define pulPinX1 7
-#define dirPinX1 6
-#define enaPinX1 5
-#define pulPinY 4
-#define dirPinY 3
-#define enaPinY 2
-#define errLed 13
-
-#define pixelSize 9.922
-#define stepSize 2.5
-
+#define errLed        13
+#define pulPinX2      10
+#define dirPinX2      9
+#define enaPinX2      8
+#define pulPinX1      7
+#define dirPinX1      6
+#define enaPinX1      5
+#define pulPinY       4
+#define dirPinY       3
+#define enaPinY       2
+#define pixelSize     9.922
+#define stepSize      2.5
 #define startPosition 0
 
-int stepsToTakeX = -1;
-int startUp, startTime, endTime, waitTime;
-bool dirMotor, dirMotorY, conEnable, onOff;
+byte index, status;
+int *cam;
 
 AccelStepper stepperX1(1, pulPinX1, dirPinX1);
 AccelStepper stepperX2(1, pulPinX2, dirPinX2);
@@ -36,68 +32,115 @@ void setup() {
   pinMode(dirPinY, OUTPUT);
   pinMode(pulPinY, OUTPUT);
   pinMode(enaPinY, OUTPUT);
-  dirMotor = true;
-  dirMotorY = true;
-  conEnable = true;
+
+  stepper_innit();
+
   digitalWrite(enaPinX2, true);
   digitalWrite(enaPinX1, true);
   digitalWrite(enaPinY, true);
-  onOff = true;
 
-  stepper_innit(stepperX1);
-  stepper_innit(stepperX2);
-  stepper_innit(stepperY);
+  index = 0;
+  status = 0;
+  cam = 0;
 }
 
-int convert_pixels2steps(float pixels){
-  int stepsToTake = (pixelSize * abs(pixels)) / stepSize;
-  return stepsToTake;
+void stepper_innit(){
+  stepperX1.setMaxSpeed(6400);
+  stepperX1.setAcceleration(3200);
+  stepperX1.setSpeed(6400);
+  stepperX2.setMaxSpeed(6400);
+  stepperX2.setAcceleration(3200);
+  stepperX2.setSpeed(6400);
+  stepperY.setMaxSpeed(6400);
+  stepperY.setAcceleration(3200);
+  stepperY.setSpeed(6400);
 }
 
-void stepper_innit(AccelStepper stepper){
-  stepper.setMaxSpeed(6400);
-  stepper.setAcceleration(6400);
-  stepper.setSpeed(3200);
+void step_direction(int steps, int dirPin){
+    if (steps >= 0)
+      digitalWrite(dirPin, true);
+    else
+      digitalWrite(dirPin, false);
 }
 
-void PulseSignal(int steps, AccelStepper stepper){
-  delay(1000);
-  startTime = millis();
-  stepper.moveTo(steps);
-  stepper.runToPosition();
-  endTime = millis();
-  delay(1000);
-  stepper.stop();
+void PulseSignal(int steps, int enaPin, int dirPin){
+  print_serial("Steps: ", steps);
+  step_direction(steps, dirPin);
+  digitalWrite(enaPin, false);
+  if (enaPin == enaPinX1){
+    stepperX1.moveTo(steps);
+    stepperX1.runToPosition();
+    stepperX1.stop();
+  } else if (enaPin == enaPinX2){
+    stepperX2.moveTo(steps);
+    stepperX2.runToPosition();
+    stepperX2.stop();
+  } else if (enaPin == enaPinY){
+    stepperY.moveTo(steps);
+    stepperY.runToPosition();
+    stepperY.stop();
+  }
+  digitalWrite(enaPin, true);
+}
+
+void print_serial(int data){
+  Serial.println(data);
+}
+
+void print_serial(String data){
+  Serial.println(data);
+}
+
+void print_serial(String txtData, int numData){
+  Serial.print(txtData);
+  Serial.println(numData);
 }
 
 void loop() {
-  int status = 0;
-  int index = 0;
-  int *cam;
-  if (Serial.available() > 0){
-    cam[index] = Serial.readString().toInt();
-    Serial.println(cam[index]);
-    index++;
-  }
+  String readSerial;
+  int enaPin = 0;
+  int dirPin = 0;
   switch (status){
     case 0:
+      readSerial = Serial.readString();
+      if (readSerial == "start"){
+        status = 1;
+      }
       break;
     case 1:
+      if (Serial.available() > 0){
+        readSerial = Serial.readString();
+        if (readSerial == "end"){
+          index = 0;
+          cam = 0;
+          status = 0;
+        }
+        else {
+          index++;
+          cam[index] = readSerial.toInt();
+          status = 2;
+        }
+      }
+      break;
+    case 2:
+      if (index == 1){
+        enaPin = enaPinX1;
+        dirPin = dirPinX1;
+      }
+      else if (index == 2){
+        enaPin = enaPinX2;
+        dirPin = dirPinX2;
+      }
+      else if (index == 3){
+        enaPin = enaPinY;
+        dirPin = dirPinY;
+      } else {
+        status = 1;
+        break;
+      }
+      print_serial("enaPin: ", enaPin);
+      PulseSignal(cam[index], enaPin, dirPin);
+      status = 1;
       break;
   }
-  
-  /*if ((millis() - waitTime) > 5000){
-    digitalWrite(enaPinX1, true);
-    digitalWrite(enaPinX2, true);
-    digitalWrite(enaPinY, true);
-  }
-  if (onOff && stepsToTakeX >= 0){
-    digitalWrite(enaPinX1, false);
-    digitalWrite(enaPinX2, false);
-    digitalWrite(enaPinY, false);
-    PulseSignal(stepsToTakeX, stepperX2);
-    stepsToTakeX = -1;
-    Serial.println(endTime - startTime);
-    waitTime = millis();
-  }*/
 }
