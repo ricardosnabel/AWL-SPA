@@ -1,15 +1,15 @@
 #include <AccelStepper.h>
 
 #define errLed        13
-#define pulPinX2      10
-#define dirPinX2      9
-#define enaPinX2      8
-#define pulPinX1      7
-#define dirPinX1      6
-#define enaPinX1      5
-#define pulPinY       4
-#define dirPinY       3
-#define enaPinY       2
+#define pulPinY2      10
+#define dirPinY2      9
+#define enaPinY2      8
+#define pulPinY1      7
+#define dirPinY1      6
+#define enaPinY1      5
+#define pulPinX       4
+#define dirPinX       3
+#define enaPinX       2
 #define pixelSize     9.922
 #define stepSize      2.5
 #define startPosition 0
@@ -17,27 +17,27 @@
 byte index, status;
 int *cam;
 
-AccelStepper stepperX1(1, pulPinX1, dirPinX1);
-AccelStepper stepperX2(1, pulPinX2, dirPinX2);
-AccelStepper stepperY(1, pulPinY, dirPinY);
+AccelStepper stepperX1(1, pulPinY1, dirPinY1);
+AccelStepper stepperX2(1, pulPinY2, dirPinY2);
+AccelStepper stepperY(1, pulPinX, dirPinX);
 
 void setup() {
   Serial.begin(2000000);
-  pinMode(dirPinX1, OUTPUT);
-  pinMode(pulPinX1, OUTPUT);
-  pinMode(enaPinX1, OUTPUT);
-  pinMode(dirPinX2, OUTPUT);
-  pinMode(pulPinX2, OUTPUT);
-  pinMode(enaPinX2, OUTPUT);
-  pinMode(dirPinY, OUTPUT);
-  pinMode(pulPinY, OUTPUT);
-  pinMode(enaPinY, OUTPUT);
+  pinMode(dirPinY1, OUTPUT);
+  pinMode(pulPinY1, OUTPUT);
+  pinMode(enaPinY1, OUTPUT);
+  pinMode(dirPinY2, OUTPUT);
+  pinMode(pulPinY2, OUTPUT);
+  pinMode(enaPinY2, OUTPUT);
+  pinMode(dirPinX, OUTPUT);
+  pinMode(pulPinX, OUTPUT);
+  pinMode(enaPinX, OUTPUT);
 
   stepper_innit();
 
-  digitalWrite(enaPinX2, true);
-  digitalWrite(enaPinX1, true);
-  digitalWrite(enaPinY, true);
+  digitalWrite(enaPinY2, true);
+  digitalWrite(enaPinY1, true);
+  digitalWrite(enaPinX, true);
 
   index = 0;
   status = 0;
@@ -67,15 +67,15 @@ void PulseSignal(int steps, int enaPin, int dirPin){
   print_serial("Steps: ", steps);
   step_direction(steps, dirPin);
   digitalWrite(enaPin, false);
-  if (enaPin == enaPinX1){
+  if (enaPin == enaPinY1){
     stepperX1.moveTo(steps);
     stepperX1.runToPosition();
     stepperX1.stop();
-  } else if (enaPin == enaPinX2){
+  } else if (enaPin == enaPinY2){
     stepperX2.moveTo(steps);
     stepperX2.runToPosition();
     stepperX2.stop();
-  } else if (enaPin == enaPinY){
+  } else if (enaPin == enaPinX){
     stepperY.moveTo(steps);
     stepperY.runToPosition();
     stepperY.stop();
@@ -124,16 +124,16 @@ void loop() {
       break;
     case 2:
       if (index == 1){
-        enaPin = enaPinX1;
-        dirPin = dirPinX1;
+        enaPin = enaPinY1;
+        dirPin = dirPinY1;
       }
       else if (index == 2){
-        enaPin = enaPinX2;
-        dirPin = dirPinX2;
+        enaPin = enaPinY2;
+        dirPin = dirPinY2;
       }
       else if (index == 3){
-        enaPin = enaPinY;
-        dirPin = dirPinY;
+        enaPin = enaPinX;
+        dirPin = dirPinX;
       } else {
         status = 1;
         break;
