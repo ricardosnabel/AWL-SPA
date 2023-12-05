@@ -15,6 +15,7 @@ externController = ['127.0.0.1', 0]
 measure = 'M'
 pixelSize = 9.922
 stepSize = 2.5
+maxSteps = 1900
 #status = 'waiting for plate'
 status = 'plate arrived'
 
@@ -49,7 +50,10 @@ def handle_data(status):
 def convert_pixels2steps(data):
     stepsToTake = []
     for i in data:
-        stepsToTake.append((pixelSize * float(i)) / stepSize)
+        calc = pixelSize * float(i) / stepSize
+        if calc > maxSteps:
+            calc = maxSteps
+        stepsToTake.append(calc)
     return stepsToTake
 
 def receive_data(sock):
@@ -97,30 +101,37 @@ def actuators_2neutral():
     write_to_arduino('0')
     write_to_arduino("end")
 
-'''def move_actuator(data):
-    if not arduino.is_open:
-        arduino = connect_to_arduino()
-        print("is_open if werkt")
-    stepsToTake = convert_pixels2steps(data[1])
-    if abs(stepsToTake[0]) - abs(stepsToTake[2]) < 5 and abs(stepsToTake[1]) - abs(stepsToTake[3]) < 5:
-        write_to_arduino("start")
-        write_to_arduino(stepsToTake[0])
-        write_to_arduino(stepsToTake[2])
-        write_to_arduino("end")
-    else:
-        # rotate plate
-        rotate(stepsToTake)'''
-
 def move_actuator(data):
     stepsToTake = convert_pixels2steps(data)
     write_to_arduino("start")
-    write_to_arduino(stepsToTake[0])
-    write_to_arduino(stepsToTake[1])
-    write_to_arduino(stepsToTake[2])
+    if data[1] != data[3]:
+        write_to_arduino(stepsToTake[1])
+        write_to_arduino(stepsToTake[3])
+    else:
+        write_to_arduino(stepsToTake[0])
+        write_to_arduino(stepsToTake[1])
+        write_to_arduino(stepsToTake[2])
     write_to_arduino("end")
 
 def rotate(data):
-    return 0
+    write_to_arduino("start")
+    if abs(data[1]) > abs(data[3]):
+        write_to_arduino(stepsToTake[3])
+        write_to_arduino(stepsToTake[3])
+        write_to_arduino("end")
+        write_to_arduino("start")
+        write_to_arduino(stepsToTake[1] + stepsToTake[3])
+        write_to_arduino(stepsToTake[3])
+        write_to_arduino("end")
+    elif abs(data[1]) < abs(data[3]):
+        write_to_arduino(stepsToTake[1])
+        write_to_arduino(stepsToTake[1])
+        write_to_arduino("end")
+        write_to_arduino("start")
+        write_to_arduino(stepsToTake[1])
+        write_to_arduino(stepsToTake[3] + stepsToTake[1])
+        write_to_arduino("end")
+    
 
 def test_program():
     if not telnet_connection(connOmron, omronController[0], omronController[1]):
