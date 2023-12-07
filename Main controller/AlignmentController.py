@@ -3,50 +3,39 @@ import time
 import serial
 import RPi.GPIO as GPIO
 
-measuredData = 1
-XAxisCam0 = 0
-YAxisCam0 = 1
-XAxisCam2 = 2
-YAxisCam2 = 3
-measure = 'M'
-pixelSize = 9.922
-stepSize = 2.5
-maxSteps = 1900
-led = 11
-redButton = 13
-greenButton = 15
+MEASUREDDATA = 1
+XAXISCAM0 = 0
+YAXISCAM0 = 1
+XAXISCAM2 = 2
+YAXISCAM2 = 3
+MEASURE = 'M'
+PIXELSIZE = 9.922
+STEPSIZE = 2.5
+MAXSTEPS = 1900
+LED = 11
+REDBUTTON = 13
+GREENBUTTON = 15
+CONNOMRON = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+CONNEXTERN = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+ARDUINO = serial.Serial(port='/dev/ttyUSB0', baudrate=2000000, timeout=.1)
+OMRONCONTROLLER = ['10.5.5.100', 9876]
+EXTERNCONTROLLER = ['127.0.0.1', 0]
 status = 'waiting for plate'
 runApp = False
 
 def conn_init():
-    global connOmron, connExtern, arduino
-    connOmron = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    connExtern = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    arduino = serial.Serial(port='/dev/ttyUSB0', baudrate=2000000, timeout=.1)
-    
-    omronController = ['10.5.5.100', 9876]
-    externController = ['127.0.0.1', 0]
-    
-    connOmron.connect((omronController[0], omronController[1]))
-    #connExtern.connect((externController[0], externController[1]))
+    CONNOMRON.connect((OMRONCONTROLLER[0], OMRONCONTROLLER[1]))
+    #CONNEXTERN.connect((EXTERNCONTROLLER[0], EXTERNCONTROLLER[1]))
 
 def GPIO_init():
     GPIO.setmode(GPIO.BOARD)
     
-    GPIO.setup(led, GPIO.OUT)
-    GPIO.setup(redButton, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(greenButton, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(LED, GPIO.OUT)
+    GPIO.setup(REDBUTTON, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(GREENBUTTON, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-    GPIO.add_event_detect(redButton,GPIO.RISING,callback=handle_redbutton)
-    GPIO.add_event_detect(greenButton,GPIO.RISING,callback=handle_greenbutton)
-
-def telnet_connection(sock, host, port):
-    try:
-        sock.settimeout(1)
-        sock.connect((host, port))
-        return True
-    except:
-        return False
+    GPIO.add_event_detect(REDBUTTON,GPIO.RISING,callback=handle_redbutton)
+    GPIO.add_event_detect(GREENBUTTON,GPIO.RISING,callback=handle_greenbutton)
 
 def sendmsg(sock, message):
     sock.send(message.encode())
@@ -62,14 +51,14 @@ def receive_data(sock):
         
 def write_to_arduino(data):
     time.sleep(1)
-    arduino.write(str.encode(str(data)))
+    ARDUINO.write(str.encode(str(data)))
     time.sleep(1)
     read_arduino()
 
 def read_arduino():
     while True:
         time.sleep(.5)
-        recv = arduino.readline()
+        recv = ARDUINO.readline()
         if not recv:
             break
         print(recv)
@@ -77,22 +66,22 @@ def read_arduino():
 def convert_pixels2steps(data):
     stepsToTake = []
     for i in data:
-        calc = pixelSize * float(i) / stepSize
-        if calc > maxSteps:
-            calc = maxSteps
+        calc = PIXELSIZE * float(i) / STEPSIZE
+        if calc > MAXSTEPS:
+            calc = MAXSTEPS
         stepsToTake.append(calc)
     return stepsToTake
 
 def move_actuator(data):
     stepsToTake = convert_pixels2steps(data)
     write_to_arduino("start")
-    if data[YAxisCam0] != data[YAxisCam2]:
-        write_to_arduino(stepsToTake[YAxisCam0])
-        write_to_arduino(stepsToTake[YAxisCam2])
+    if data[YAXISCAM0] != data[YAXISCAM2]:
+        write_to_arduino(stepsToTake[YAXISCAM0])
+        write_to_arduino(stepsToTake[YAXISCAM2])
     else:
-        write_to_arduino(stepsToTake[XAxisCam0])
-        write_to_arduino(stepsToTake[YAxisCam0])
-        write_to_arduino(stepsToTake[XAxisCam2])
+        write_to_arduino(stepsToTake[XAXISCAM0])
+        write_to_arduino(stepsToTake[YAXISCAM0])
+        write_to_arduino(stepsToTake[XAXISCAM2])
     write_to_arduino("end")
 
 def rotate(data):
@@ -111,9 +100,9 @@ def handle_greenbutton(channel):
     status = 'plate arrived'
     GPIO.output(11, 1)
 
-    GPIO.remove_event_detect(greenButton)
+    GPIO.remove_event_detect(GREENBUTTON)
     time.sleep(1)
-    GPIO.add_event_detect(greenButton,GPIO.RISING,callback=handle_greenbutton)
+    GPIO.add_event_detect(GREENBUTTON,GPIO.RISING,callback=handle_greenbutton)
 
 def handle_redbutton(channel):
     global runApp, status
@@ -121,34 +110,35 @@ def handle_redbutton(channel):
     status = 'return to neutral'
     GPIO.output(11, 0)
 
-    GPIO.remove_event_detect(redButton)
+    GPIO.remove_event_detect(REDBUTTON)
     time.sleep(1)
-    GPIO.add_event_detect(redButton,GPIO.RISING,callback=handle_redbutton)
+    GPIO.add_event_detect(REDBUTTON,GPIO.RISING,callback=handle_redbutton)
 
-def handle_data(status):
+def handle_data():
+    global status
     match status:
         case 'waiting for plate':
-            data = receive_data(connExtern)
+            data = receive_data(CONNEXTERN)
             if data == 'OK':
                 status = 'plate arrived'
         case 'plate arrived':
             actuators_2neutral()
-            sendmsg(connOmron, measure)
-            data = receive_data(connOmron)
+            sendmsg(CONNOMRON, MEASURE)
+            data = receive_data(CONNOMRON)
             if data[0] == 'OK':
                 status = 'unaligned'
         case 'unaligned':
-            sendmsg(connOmron, measure)
-            data = receive_data(connOmron)
+            sendmsg(CONNOMRON, MEASURE)
+            data = receive_data(CONNOMRON)
             if data[1] == 'READY':
                 status = 'aligned'
             else:
                 move_actuator(data[1])
         case 'aligned':
-            sendmsg(connExtern, 'OK')
+            sendmsg(CONNEXTERN, 'OK')
             status = 'wait for external module'
         case 'wait for external module':
-            if receive_data(connExtern) == 'OK':
+            if receive_data(CONNEXTERN) == 'OK':
                 status = 'return to neutral'
         case 'return to neutral':
             actuators_2neutral()
@@ -156,22 +146,21 @@ def handle_data(status):
 
 def test_program():   
     start_time = time.perf_counter()
-    sendmsg(connOmron, measure)
-    test_data = receive_data(connOmron)
-    print(test_data[measuredData])
+    sendmsg(CONNOMRON, MEASURE)
+    test_data = receive_data(CONNOMRON)
+    print(test_data[MEASUREDDATA])
 
     end_time = time.perf_counter()
     measured_time = end_time - start_time
     print(f'Total runtime: {measured_time:0.4f} seconds')
 
-    move_actuator(test_data[measuredData])
+    move_actuator(test_data[MEASUREDDATA])
     time.sleep(2)
     actuators_2neutral()
 
 if __name__ == '__main__':
     GPIO_init()
     conn_init()
-
     try:
         while True:
             time.sleep(1)
@@ -181,7 +170,7 @@ if __name__ == '__main__':
                 print("Program is off.")
     except KeyboardInterrupt:
         GPIO.cleanup()
-        connOmron.close()
-        #connExtern.close()
-        arduino.close()
+        CONNOMRON.close()
+        #CONNEXTERN.close()
+        ARDUINO.close()
     
