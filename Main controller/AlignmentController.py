@@ -20,11 +20,12 @@ CONNEXTERN = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ARDUINO = serial.Serial(port='/dev/ttyUSB0', baudrate=2000000, timeout=.1)
 OMRONCONTROLLER = ['10.5.5.100', 9876]
 EXTERNCONTROLLER = ['127.0.0.1', 0]
-status = 'waiting for plate'
 runApp = False
 
 def conn_init():
+    CONNOMRON.settimeout(1)
     CONNOMRON.connect((OMRONCONTROLLER[0], OMRONCONTROLLER[1]))
+    #CONNEXTERN.settimeout(1)
     #CONNEXTERN.connect((EXTERNCONTROLLER[0], EXTERNCONTROLLER[1]))
 
 def GPIO_init():
@@ -95,9 +96,9 @@ def actuators_2neutral():
     write_to_arduino("end")
 
 def handle_greenbutton(channel):
-    global runApp, status
+    global runApp
     runApp = True
-    status = 'plate arrived'
+    print("green")
     GPIO.output(11, 1)
 
     GPIO.remove_event_detect(GREENBUTTON)
@@ -105,44 +106,46 @@ def handle_greenbutton(channel):
     GPIO.add_event_detect(GREENBUTTON,GPIO.RISING,callback=handle_greenbutton)
 
 def handle_redbutton(channel):
-    global runApp, status
+    global runApp
     runApp = False
-    status = 'return to neutral'
+    print("red")
     GPIO.output(11, 0)
 
     GPIO.remove_event_detect(REDBUTTON)
     time.sleep(1)
     GPIO.add_event_detect(REDBUTTON,GPIO.RISING,callback=handle_redbutton)
 
-def handle_data():
-    global status
-    match status:
-        case 'waiting for plate':
-            data = receive_data(CONNEXTERN)
-            if data == 'OK':
-                status = 'plate arrived'
-        case 'plate arrived':
-            actuators_2neutral()
-            sendmsg(CONNOMRON, MEASURE)
-            data = receive_data(CONNOMRON)
-            if data[0] == 'OK':
-                status = 'unaligned'
-        case 'unaligned':
-            sendmsg(CONNOMRON, MEASURE)
-            data = receive_data(CONNOMRON)
-            if data[1] == 'READY':
-                status = 'aligned'
-            else:
-                move_actuator(data[1])
-        case 'aligned':
-            sendmsg(CONNEXTERN, 'OK')
-            status = 'wait for external module'
-        case 'wait for external module':
-            if receive_data(CONNEXTERN) == 'OK':
-                status = 'return to neutral'
-        case 'return to neutral':
-            actuators_2neutral()
-            status = 'waiting for plate'
+def handle_data(status):
+    while True:
+        match status:
+            case 'waiting for plate':
+                #data = receive_data(CONNEXTERN)
+                #if data == 'OK':
+                if runApp:
+                    print("waiting for plate")
+                    status = 'plate arrived'
+            case 'plate arrived':
+                sendmsg(CONNOMRON, MEASURE)
+                data = receive_data(CONNOMRON)
+                if data[0][0] == 'OK\r':
+                    status = 'unaligned'
+            case 'unaligned':
+                sendmsg(CONNOMRON, MEASURE)
+                data = receive_data(CONNOMRON)
+                print(data[MEASUREDDATA])
+                if data[1] == 'READY\r':
+                    status = 'aligned'
+                else:
+                    move_actuator(data[MEASUREDDATA])
+            case 'aligned':
+                sendmsg(CONNEXTERN, 'OK')
+                status = 'wait for external module'
+            case 'wait for external module':
+                if receive_data(CONNEXTERN) == 'OK\r':
+                    status = 'return to neutral'
+            case 'return to neutral':
+                actuators_2neutral()
+                status = 'waiting for plate'
 
 def test_program():   
     start_time = time.perf_counter()
@@ -161,13 +164,15 @@ def test_program():
 if __name__ == '__main__':
     GPIO_init()
     conn_init()
+    status = 'waiting for plate'
     try:
-        while True:
+        handle_data(status)
+        '''while True:
             time.sleep(1)
             if runApp == True:
                 test_program()
             elif runApp == False:
-                print("Program is off.")
+                print("Program is off.")'''
     except KeyboardInterrupt:
         GPIO.cleanup()
         CONNOMRON.close()
