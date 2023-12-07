@@ -1,6 +1,7 @@
 import socket
 import time
 import serial
+import RPi.GPIO as GPIO
 
 measuredData = 1
 XAxisCam0 = 0
@@ -16,36 +17,42 @@ measure = 'M'
 pixelSize = 9.922
 stepSize = 2.5
 maxSteps = 1900
+led = 11
+redButton = 13
+greenButton = 15
+runApp = False
 #status = 'waiting for plate'
 status = 'plate arrived'
 
 def handle_data(status):
-    match status:
-        case 'waiting for plate':
-            #if telnet_connection(externController[0], externController[1]):
-            data = receive_data(connExtern)
-            if data == 'OK':
-                status = 'plate arrived'
-        case 'plate arrived':
-            sendmsg(connOmron, measure)
-            data = receive_data(connOmron)
-            if data[0] == 'OK':
-                status = 'unaligned'
-        case 'unaligned':
-            sendmsg(connOmron, measure)
-            data = receive_data(connOmroln)
-            if data[1] == 'READY':
-                status = 'aligned'
-            else:
-                move_actuator(data[1])
-        case 'aligned':
-            sendmsg(connExtern, 'OK')
-            status = 'return to neutral'
-        case 'return to neutral':
-            if receive_data(connExtern) == 'OK':
-                write_to_arduino()
-                arduino.close()
-                status = 'waiting for plate'
+    if runApp:
+        match status:
+            case 'waiting for plate':
+                #if telnet_connection(externController[0], externController[1]):
+                data = receive_data(connExtern)
+                if data == 'OK':
+                    status = 'plate arrived'
+            case 'plate arrived':
+                actuators_2neutral()
+                sendmsg(connOmron, measure)
+                data = receive_data(connOmron)
+                if data[0] == 'OK':
+                    status = 'unaligned'
+            case 'unaligned':
+                sendmsg(connOmron, measure)
+                data = receive_data(connOmroln)
+                if data[1] == 'READY':
+                    status = 'aligned'
+                else:
+                    move_actuator(data[1])
+            case 'aligned':
+                sendmsg(connExtern, 'OK')
+                status = 'return to neutral'
+            case 'return to neutral':
+                if receive_data(connExtern) == 'OK':
+                    write_to_arduino()
+                    arduino.close()
+                    status = 'waiting for plate'            
 
 def convert_pixels2steps(data):
     stepsToTake = []
@@ -114,30 +121,27 @@ def move_actuator(data):
     write_to_arduino("end")
 
 def rotate(data):
-    write_to_arduino("start")
-    if abs(data[1]) > abs(data[3]):
-        write_to_arduino(stepsToTake[3])
-        write_to_arduino(stepsToTake[3])
-        write_to_arduino("end")
-        write_to_arduino("start")
-        write_to_arduino(stepsToTake[1] + stepsToTake[3])
-        write_to_arduino(stepsToTake[3])
-        write_to_arduino("end")
-    elif abs(data[1]) < abs(data[3]):
-        write_to_arduino(stepsToTake[1])
-        write_to_arduino(stepsToTake[1])
-        write_to_arduino("end")
-        write_to_arduino("start")
-        write_to_arduino(stepsToTake[1])
-        write_to_arduino(stepsToTake[3] + stepsToTake[1])
-        write_to_arduino("end")
-    
+    return 0
 
-def test_program():
-    if not telnet_connection(connOmron, omronController[0], omronController[1]):
-        print("Connection error.")
-        return 0
-    
+def handle_greenbutton(channel):
+    global runApp
+    GPIO.remove_event_detect(greenButton)
+    print("groen")
+    runApp = True
+    GPIO.output(11, 1)
+    time.sleep(1)
+    GPIO.add_event_detect(greenButton,GPIO.RISING,callback=handle_greenbutton)
+
+def handle_redbutton(channel):
+    global runApp
+    GPIO.remove_event_detect(redButton)
+    print("rood")
+    runApp = False
+    GPIO.output(11, 0)
+    time.sleep(1)
+    GPIO.add_event_detect(redButton,GPIO.RISING,callback=handle_redbutton)
+
+def test_program():   
     start_time = time.perf_counter()
     sendmsg(connOmron, measure)
     test_data = receive_data(connOmron)
@@ -151,6 +155,24 @@ def test_program():
     time.sleep(2)
     actuators_2neutral()
 
-test_program()
-arduino.close()
-connOmron.close()
+if __name__ == '__main__':
+    GPIO.setmode(GPIO.BOARD)
+    
+    GPIO.setup(led, GPIO.OUT)
+    GPIO.setup(redButton, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(greenButton, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+    GPIO.add_event_detect(redButton,GPIO.RISING,callback=handle_redbutton)
+    GPIO.add_event_detect(greenButton,GPIO.RISING,callback=handle_greenbutton)
+
+    telnet_connection(connOmron, omronController[0], omronController[1])
+
+    while True:
+        time.sleep(1)
+        if runApp == True:
+            test_program()
+        elif runApp == False:
+            print("Program is off.")
+
+    arduino.close()
+    
