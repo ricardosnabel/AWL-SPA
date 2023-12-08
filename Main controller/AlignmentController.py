@@ -1,5 +1,6 @@
 import socket
 import time
+import math
 import serial
 import RPi.GPIO as GPIO
 
@@ -9,6 +10,9 @@ YAXISCAM0 = 1
 XAXISCAM2 = 2
 YAXISCAM2 = 3
 MEASURE = 'M'
+DISTANCEX = 262.5 / 2
+DISTANCEY = 142.5 / 2
+XMOTORDISTANCE = 92
 PIXELSIZE = 9.922
 STEPSIZE = 2.5
 MAXSTEPS = 1900
@@ -74,19 +78,26 @@ def convert_pixels2steps(data):
     return stepsToTake
 
 def move_actuator(data):
-    stepsToTake = convert_pixels2steps(data)
     write_to_arduino("start")
     if data[YAXISCAM0] != data[YAXISCAM2]:
-        write_to_arduino(stepsToTake[YAXISCAM0])
-        write_to_arduino(stepsToTake[YAXISCAM2])
+        stepsToTake = rotate(data)
+        write_to_arduino(stepsToTake)
+        write_to_arduino(stepsToTake)
     else:
+        stepsToTake = convert_pixels2steps(data)
         write_to_arduino(stepsToTake[XAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM0])
         write_to_arduino(stepsToTake[XAXISCAM2])
     write_to_arduino("end")
 
 def rotate(data):
-    return 0
+    epsilon = abs(data[XAXISCAM0] - data[XAXISCAM2])
+    n = (((XMOTORDISTANCE * XMOTORDISTANCE) / 4) - ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
+    m = (142.5 * epsilon) / 92
+    m *= -1
+    p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
+
+    return convert_pixels2steps([(m + math.sqrt((m*m) - 4 * n * p)) / (2 * n)])
 
 def actuators_2neutral():
     write_to_arduino("start")
