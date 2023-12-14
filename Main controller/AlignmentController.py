@@ -113,7 +113,7 @@ def move_actuator(data):
     write_to_arduino("end")
 
 def rotate(data):
-    epsilon = abs(convert_pixels2um(data[XAXISCAM0]) - convert_pixels2um(data[XAXISCAM2]))
+    epsilon = abs(convert_pixels2um(float(data[XAXISCAM0])) - convert_pixels2um(float(data[XAXISCAM2])))
     n = (((XMOTORDISTANCE * XMOTORDISTANCE) / 4) - ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
     m = (((DISTANCEY*2) * epsilon) / XMOTORDISTANCE) # * -1
     p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
