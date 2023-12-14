@@ -72,27 +72,27 @@ def read_arduino():
 
 def convert_um2steps(data):
     if isinstance(data, int) or isinstance(data, float):
-	    stepsToTake = maxsteps_check(data / STEPSIZE)
+        stepsToTake = maxsteps_check(data / STEPSIZE)
     else:
-	    stepsToTake = []
-	    for i in data:
-	        stepsToTake.append(maxsteps_check(i / STEPSIZE))
+        stepsToTake = []
+        for i in data:
+            stepsToTake.append(maxsteps_check(i / STEPSIZE))
     return stepsToTake
 
 def convert_pixels2um(data):
     if isinstance(data, int) or isinstance(data, float):
-	    distInUm = PIXELSIZE * float(data)
+        distInUm = PIXELSIZE * float(data)
     else:
-	    distInUm = []
-	    for i in data:
-	        distInUm.append(PIXELSIZE * float(i))
+        distInUm = []
+        for i in data:
+            distInUm.append(PIXELSIZE * float(i))
     return distInUm
 
-def maxstep_check(steps):
+def maxsteps_check(steps):
     if steps > MAXSTEPS:
-	    steps = MAXSTEPS
+        steps = MAXSTEPS
     elif steps < -MAXSTEPS:
-	    steps = -MAXSTEPS
+        steps = -MAXSTEPS
     return steps
 
 def move_actuator(data):
@@ -121,7 +121,7 @@ def rotate(data):
     calc = (m + math.sqrt(abs(sqrtcalc))) / (2 * n)
     stepsToTake = convert_um2steps(calc)
     if sqrtcalc < 0:
-	    stepsToTake = -stepsToTake
+        stepsToTake = -stepsToTake
     print(calc)
     print(stepsToTake)
     return stepsToTake
@@ -209,8 +209,8 @@ if __name__ == '__main__':
         #handle_data(status)
         test_data = receive_data(CONNOMRON)
         while True:
-	        test_program()
-       	    time.sleep(1)
+            test_program()
+            time.sleep(1)
             '''if runApp == True:
                 test_program()
             elif runApp == False:
