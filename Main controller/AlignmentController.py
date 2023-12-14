@@ -10,12 +10,13 @@ YAXISCAM0 = 1
 XAXISCAM2 = 2
 YAXISCAM2 = 3
 MEASURE = 'M'
-DISTANCEX = 262.5 / 2
-DISTANCEY = 142.5 / 2
+LAYOUT = 'DLN 0 1'
+DISTANCEX = 262500 / 2
+DISTANCEY = 140000 / 2
 XMOTORDISTANCE = 92
 PIXELSIZE = 9.922
 STEPSIZE = 2.5
-MAXSTEPS = 1900
+MAXSTEPS = 1500 # test maximum
 LED = 11
 REDBUTTON = 13
 GREENBUTTON = 15
@@ -29,6 +30,7 @@ runApp = False
 def conn_init():
     CONNOMRON.settimeout(1)
     CONNOMRON.connect((OMRONCONTROLLER[0], OMRONCONTROLLER[1]))
+    sendmsg(CONNOMRON, LAYOUT)
     #CONNEXTERN.settimeout(1)
     #CONNEXTERN.connect((EXTERNCONTROLLER[0], EXTERNCONTROLLER[1]))
 
@@ -74,30 +76,45 @@ def convert_pixels2steps(data):
         calc = PIXELSIZE * float(i) / STEPSIZE
         if calc > MAXSTEPS:
             calc = MAXSTEPS
+        elif calc < (MAXSTEPS * -1):
+            calc = MAXSTEPS * -1
         stepsToTake.append(calc)
     return stepsToTake
 
 def move_actuator(data):
     write_to_arduino("start")
-    if data[YAXISCAM0] != data[YAXISCAM2]:
+    '''if data[YAXISCAM0] != data[YAXISCAM2]:
         stepsToTake = rotate(data)
+        print(stepsToTake)
         write_to_arduino(stepsToTake)
         write_to_arduino(stepsToTake)
     else:
         stepsToTake = convert_pixels2steps(data)
+        #print(stepsToTake)
         write_to_arduino(stepsToTake[XAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM0])
-        write_to_arduino(stepsToTake[XAXISCAM2])
+        write_to_arduino(stepsToTake[XAXISCAM2])'''
+    stepsToTake = convert_pixels2steps(data)
+    write_to_arduino(stepsToTake[XAXISCAM0])
+    write_to_arduino(stepsToTake[YAXISCAM0])
+    write_to_arduino(stepsToTake[XAXISCAM2])
     write_to_arduino("end")
 
 def rotate(data):
-    epsilon = abs(data[XAXISCAM0] - data[XAXISCAM2])
+    epsilon = abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) * PIXELSIZE
     n = (((XMOTORDISTANCE * XMOTORDISTANCE) / 4) - ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
-    m = (142.5 * epsilon) / 92
-    m *= -1
+    m = ((DISTANCEY*2) * epsilon) / XMOTORDISTANCE
+    #m *= -1
     p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
-
-    return convert_pixels2steps([(m + math.sqrt((m*m) - 4 * n * p)) / (2 * n)])
+    testcalc = (m*m) - (4 * n * p)
+    print(testcalc)
+    sqrt = math.sqrt((m*m) - (4 * n * p))
+    calc = (m + sqrt) / (2 * n)
+    stepsToTake = calc / STEPSIZE
+    if stepsToTake > MAXSTEPS:
+        stepsToTake = MAXSTEPS
+    print(calc)
+    return stepsToTake
 
 def actuators_2neutral():
     write_to_arduino("start")
@@ -136,6 +153,7 @@ def handle_data(status):
                     print("waiting for plate")
                     status = 'plate arrived'
             case 'plate arrived':
+                actuators_2neutral()
                 sendmsg(CONNOMRON, MEASURE)
                 data = receive_data(CONNOMRON)
                 if data[0][0] == 'OK\r':
@@ -167,17 +185,21 @@ def test_program():
     end_time = time.perf_counter()
     measured_time = end_time - start_time
     print(f'Total runtime: {measured_time:0.4f} seconds')
-
+    
     move_actuator(test_data[MEASUREDDATA])
+    #move_actuator(['200.00', '560.00', '-150.00', '180.00'])
     time.sleep(2)
     actuators_2neutral()
 
 if __name__ == '__main__':
-    GPIO_init()
+    #GPIO_init()
     conn_init()
     status = 'waiting for plate'
     try:
-        handle_data(status)
+        #handle_data(status)
+        test_data = receive_data(CONNOMRON)
+        while True:
+            test_program()
         '''while True:
             time.sleep(1)
             if runApp == True:
