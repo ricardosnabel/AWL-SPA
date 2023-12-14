@@ -18,7 +18,7 @@ PIXELSIZE = 9.922
 STEPSIZE = 2.5
 MAXSTEPS = 1500 # test maximum
 LED = 11
-REDBUTTON = 13
+REDBUTTON = 16
 GREENBUTTON = 15
 CONNOMRON = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 CONNEXTERN = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,7 +36,7 @@ def conn_init():
 
 def GPIO_init():
     GPIO.setmode(GPIO.BOARD)
-    
+
     GPIO.setup(LED, GPIO.OUT)
     GPIO.setup(REDBUTTON, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(GREENBUTTON, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -55,7 +55,7 @@ def receive_data(sock):
             fragments.append(data.decode().replace(" ", "").split(","))
         except TimeoutError:
             return fragments
-        
+
 def write_to_arduino(data):
     time.sleep(1)
     ARDUINO.write(str.encode(str(data)))
@@ -70,50 +70,60 @@ def read_arduino():
             break
         print(recv)
 
-def convert_pixels2steps(data):
-    stepsToTake = []
-    for i in data:
-        calc = PIXELSIZE * float(i) / STEPSIZE
-        if calc > MAXSTEPS:
-            calc = MAXSTEPS
-        elif calc < (MAXSTEPS * -1):
-            calc = MAXSTEPS * -1
-        stepsToTake.append(calc)
+def convert_um2steps(data):
+    if isinstance(data, int) or isinstance(data, float):
+	    stepsToTake = maxsteps_check(data / STEPSIZE)
+    else:
+	    stepsToTake = []
+	    for i in data:
+	        stepsToTake.append(maxsteps_check(i / STEPSIZE))
     return stepsToTake
+
+def convert_pixels2um(data):
+    if isinstance(data, int) or isinstance(data, float):
+	    distInUm = PIXELSIZE * float(data)
+    else:
+	    distInUm = []
+	    for i in data:
+	        distInUm.append(PIXELSIZE * float(i))
+    return distInUm
+
+def maxstep_check(steps):
+    if steps > MAXSTEPS:
+	    steps = MAXSTEPS
+    elif steps < -MAXSTEPS:
+	    steps = -MAXSTEPS
+    return steps
 
 def move_actuator(data):
     write_to_arduino("start")
-    '''if data[YAXISCAM0] != data[YAXISCAM2]:
+    if data[YAXISCAM0] != data[YAXISCAM2]:
         stepsToTake = rotate(data)
-        print(stepsToTake)
         write_to_arduino(stepsToTake)
         write_to_arduino(stepsToTake)
     else:
-        stepsToTake = convert_pixels2steps(data)
-        #print(stepsToTake)
+        stepsToTake = convert_um2steps(convert_pixels2um(data))
         write_to_arduino(stepsToTake[XAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM0])
-        write_to_arduino(stepsToTake[XAXISCAM2])'''
-    stepsToTake = convert_pixels2steps(data)
+        write_to_arduino(stepsToTake[XAXISCAM2])
+    '''stepsToTake = convert_um2steps(convert_pixels2um(data))
     write_to_arduino(stepsToTake[XAXISCAM0])
     write_to_arduino(stepsToTake[YAXISCAM0])
-    write_to_arduino(stepsToTake[XAXISCAM2])
+    write_to_arduino(stepsToTake[XAXISCAM2])'''
     write_to_arduino("end")
 
 def rotate(data):
-    epsilon = abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) * PIXELSIZE
+    epsilon = abs(convert_pixels2um(data[XAXISCAM0]) - convert_pixels2um(data[XAXISCAM2]))
     n = (((XMOTORDISTANCE * XMOTORDISTANCE) / 4) - ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
-    m = ((DISTANCEY*2) * epsilon) / XMOTORDISTANCE
-    #m *= -1
+    m = (((DISTANCEY*2) * epsilon) / XMOTORDISTANCE) # * -1
     p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
-    testcalc = (m*m) - (4 * n * p)
-    print(testcalc)
-    sqrt = math.sqrt((m*m) - (4 * n * p))
-    calc = (m + sqrt) / (2 * n)
-    stepsToTake = calc / STEPSIZE
-    if stepsToTake > MAXSTEPS:
-        stepsToTake = MAXSTEPS
+    sqrtcalc = (m*m) - (4 * n * p)
+    calc = (m + math.sqrt(abs(sqrtcalc))) / (2 * n)
+    stepsToTake = convert_um2steps(calc)
+    if sqrtcalc < 0:
+	    stepsToTake = -stepsToTake
     print(calc)
+    print(stepsToTake)
     return stepsToTake
 
 def actuators_2neutral():
@@ -176,7 +186,7 @@ def handle_data(status):
                 actuators_2neutral()
                 status = 'waiting for plate'
 
-def test_program():   
+def test_program():
     start_time = time.perf_counter()
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
@@ -185,10 +195,10 @@ def test_program():
     end_time = time.perf_counter()
     measured_time = end_time - start_time
     print(f'Total runtime: {measured_time:0.4f} seconds')
-    
+
     move_actuator(test_data[MEASUREDDATA])
     #move_actuator(['200.00', '560.00', '-150.00', '180.00'])
-    time.sleep(2)
+    time.sleep(.5)
     actuators_2neutral()
 
 if __name__ == '__main__':
@@ -199,10 +209,9 @@ if __name__ == '__main__':
         #handle_data(status)
         test_data = receive_data(CONNOMRON)
         while True:
-            test_program()
-        '''while True:
-            time.sleep(1)
-            if runApp == True:
+	        test_program()
+       	    time.sleep(1)
+            '''if runApp == True:
                 test_program()
             elif runApp == False:
                 print("Program is off.")'''
@@ -211,4 +220,4 @@ if __name__ == '__main__':
         CONNOMRON.close()
         #CONNEXTERN.close()
         ARDUINO.close()
-    
+
