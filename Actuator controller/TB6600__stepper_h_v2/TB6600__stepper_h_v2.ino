@@ -1,6 +1,5 @@
 #include <AccelStepper.h>
 
-#define errLed        13
 #define pulPinY2      10
 #define dirPinY2      9
 #define enaPinY2      8
@@ -10,8 +9,6 @@
 #define pulPinX       4
 #define dirPinX       3
 #define enaPinX       2
-#define pixelSize     9.922
-#define stepSize      2.5
 #define startPosition 0
 
 byte index, status;
@@ -45,15 +42,15 @@ void setup() {
 }
 
 void stepper_innit(){
-  stepperX1.setMaxSpeed(6400);
-  stepperX1.setAcceleration(3200);
-  stepperX1.setSpeed(6400);
-  stepperX2.setMaxSpeed(6400);
-  stepperX2.setAcceleration(3200);
-  stepperX2.setSpeed(6400);
-  stepperY.setMaxSpeed(6400);
-  stepperY.setAcceleration(3200);
-  stepperY.setSpeed(6400);
+  stepperX1.setMaxSpeed(400);
+  stepperX1.setAcceleration(100);
+  stepperX1.setSpeed(100);
+  stepperX2.setMaxSpeed(400);
+  stepperX2.setAcceleration(100);
+  stepperX2.setSpeed(100);
+  stepperY.setMaxSpeed(400);
+  stepperY.setAcceleration(100);
+  stepperY.setSpeed(100);
 }
 
 void step_direction(int steps, int dirPin){
