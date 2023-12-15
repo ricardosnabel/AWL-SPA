@@ -111,9 +111,9 @@ def move_actuator(data, check):
     else:
         stepsToTake = convert_um2steps(convert_pixels2um(data))
         print("Translation: ", stepsToTake)
-        write_to_arduino(stepsToTake[XAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM0])
-        write_to_arduino(stepsToTake[XAXISCAM2])
+        write_to_arduino(stepsToTake[YAXISCAM2])
+        write_to_arduino(stepsToTake[XAXISCAM0])
     '''stepsToTake = convert_um2steps(convert_pixels2um(data))
     write_to_arduino(stepsToTake[XAXISCAM0])
     write_to_arduino(stepsToTake[YAXISCAM0])
