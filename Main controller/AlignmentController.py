@@ -71,7 +71,7 @@ def read_arduino():
         print(recv)
 
 def convert_um2steps(data):
-    if isinstance(data, int) or isinstance(data, float):
+    if isinstance(data, float):
         stepsToTake = maxsteps_check(data / STEPSIZE)
     else:
         stepsToTake = []
@@ -80,8 +80,8 @@ def convert_um2steps(data):
     return stepsToTake
 
 def convert_pixels2um(data):
-    if isinstance(data, int) or isinstance(data, float):
-        distInUm = PIXELSIZE * float(data)
+    if isinstance(data, float):
+        distInUm = PIXELSIZE * data
     else:
         distInUm = []
         for i in data:
@@ -95,20 +95,22 @@ def maxsteps_check(steps):
         steps = -MAXSTEPS
     return steps
 
-def move_actuator(data):
+def move_actuator(data, check):
     write_to_arduino("start")
-    if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 0:
+    if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 0 and check:
         stepsToTake = rotate(data)
-        if stepsToTake < 0:
-            print(stepsToTake)
-            write_to_arduino(-stepsToTake)
-            write_to_arduino(stepsToTake)
+        print("Rotation: ", stepsToTake)
+        if float(data[XAXISCAM0]) < 0.0:
+            write_to_arduino(abs(stepsToTake))
         else:
-            write_to_arduino(stepsToTake)
-            write_to_arduino(-stepsToTake)
+            write_to_arduino(-abs(stepsToTake))
+        if float(data[XAXISCAM2]) < 0.0:
+            write_to_arduino(abs(stepsToTake))
+        else:
+            write_to_arduino(-abs(stepsToTake))
     else:
         stepsToTake = convert_um2steps(convert_pixels2um(data))
-        print(stepsToTake)
+        print("Translation: ", stepsToTake)
         write_to_arduino(stepsToTake[XAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM0])
         write_to_arduino(stepsToTake[XAXISCAM2])
@@ -124,7 +126,7 @@ def rotate(data):
     m = (((DISTANCEY*2) * epsilon) / XMOTORDISTANCE)
     p = ((epsilon * epsilon) / 4) - DISTANCEX
     sqrtcalc = (m*m) - (4 * n * p)
-    calc = (m + math.sqrt(abs(sqrtcalc))) / (2 * n)
+    calc = (m - math.sqrt(abs(sqrtcalc))) / (2 * n)
     stepsToTake = convert_um2steps(calc)
     if sqrtcalc < 0:
         stepsToTake = -stepsToTake
@@ -201,17 +203,22 @@ def test_program():
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
 
-    #move_actuator(test_data[MEASUREDDATA])
-    write_to_arduino("start")
+    move_actuator(test_data[MEASUREDDATA], True)
+    '''write_to_arduino("start")
     write_to_arduino('20')
     write_to_arduino('20')
     write_to_arduino('20')
     write_to_arduino("end")
-    #move_actuator(['200.00', '560.00', '-150.00', '180.00'])
+    #move_actuator(['200.00', '560.00', '-150.00', '180.00'])'''
     time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
-    print(test_data)
+    print(test_data[MEASUREDDATA])
+    move_actuator(test_data[MEASUREDDATA], False)
+    time.sleep(2)
+    sendmsg(CONNOMRON, MEASURE)
+    test_data = receive_data(CONNOMRON)
+    print(test_data[MEASUREDDATA])
     actuators_2neutral()
 
 if __name__ == '__main__':
@@ -222,10 +229,11 @@ if __name__ == '__main__':
         #handle_data(status)
         test_data = receive_data(CONNOMRON)
         #rotate(['46', '-76', '-49', '99'])
-        while True:
+        test_program()
+        '''while True:
             test_program()
             time.sleep(1)
-            '''if runApp == True:
+            if runApp == True:
                 test_program()
             elif runApp == False:
                 print("Program is off.")'''
