@@ -97,13 +97,15 @@ def maxsteps_check(steps):
 
 def move_actuator(data):
     write_to_arduino("start")
-    if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 10:
+    if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 0:
         stepsToTake = rotate(data)
-        print(data[XAXISCAM0])
-        print(data[XAXISCAM2])
-        print(stepsToTake)
-        write_to_arduino(stepsToTake)
-        write_to_arduino(stepsToTake)
+        if stepsToTake < 0:
+            print(stepsToTake)
+            write_to_arduino(-stepsToTake)
+            write_to_arduino(stepsToTake)
+        else:
+            write_to_arduino(stepsToTake)
+            write_to_arduino(-stepsToTake)
     else:
         stepsToTake = convert_um2steps(convert_pixels2um(data))
         print(stepsToTake)
@@ -118,16 +120,20 @@ def move_actuator(data):
 
 def rotate(data):
     epsilon = abs(convert_pixels2um(float(data[XAXISCAM0])) - convert_pixels2um(float(data[XAXISCAM2])))
-    n = (((XMOTORDISTANCE * XMOTORDISTANCE) / 4) - ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
-    m = (((DISTANCEY*2) * epsilon) / XMOTORDISTANCE) # * -1
-    p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
+    n = ((4 / (XMOTORDISTANCE * XMOTORDISTANCE)) * ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
+    m = (((DISTANCEY*2) * epsilon) / XMOTORDISTANCE)
+    p = ((epsilon * epsilon) / 4) - DISTANCEX
     sqrtcalc = (m*m) - (4 * n * p)
     calc = (m + math.sqrt(abs(sqrtcalc))) / (2 * n)
     stepsToTake = convert_um2steps(calc)
     if sqrtcalc < 0:
         stepsToTake = -stepsToTake
-    print(calc)
-    print(stepsToTake)
+    print("Epsilon: ", epsilon)
+    print("N: ", n)
+    print("M: ", m)
+    print("P: ", p)
+    print("Calc: ", calc)
+    print("Steps: ", stepsToTake)
     return stepsToTake
 
 def actuators_2neutral():
@@ -215,7 +221,7 @@ if __name__ == '__main__':
     try:
         #handle_data(status)
         test_data = receive_data(CONNOMRON)
-        rotate(['906', '-628', '409', '47'])
+        #rotate(['46', '-76', '-49', '99'])
         while True:
             test_program()
             time.sleep(1)
