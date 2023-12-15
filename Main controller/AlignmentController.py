@@ -13,7 +13,7 @@ MEASURE = 'M'
 LAYOUT = 'DLN 0 1'
 DISTANCEX = 262500 / 2
 DISTANCEY = 140000 / 2
-XMOTORDISTANCE = 92
+XMOTORDISTANCE = 92000 # distance between two translation points
 PIXELSIZE = 9.922
 STEPSIZE = 2.5
 MAXSTEPS = 1500 # test maximum
@@ -57,9 +57,9 @@ def receive_data(sock):
             return fragments
 
 def write_to_arduino(data):
-    time.sleep(1)
+    time.sleep(2)
     ARDUINO.write(str.encode(str(data)))
-    time.sleep(1)
+    time.sleep(2)
     read_arduino()
 
 def read_arduino():
@@ -97,12 +97,16 @@ def maxsteps_check(steps):
 
 def move_actuator(data):
     write_to_arduino("start")
-    if data[YAXISCAM0] != data[YAXISCAM2]:
+    if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 10:
         stepsToTake = rotate(data)
+        print(data[XAXISCAM0])
+        print(data[XAXISCAM2])
+        print(stepsToTake)
         write_to_arduino(stepsToTake)
         write_to_arduino(stepsToTake)
     else:
         stepsToTake = convert_um2steps(convert_pixels2um(data))
+        print(stepsToTake)
         write_to_arduino(stepsToTake[XAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM0])
         write_to_arduino(stepsToTake[XAXISCAM2])
@@ -187,18 +191,21 @@ def handle_data(status):
                 status = 'waiting for plate'
 
 def test_program():
-    start_time = time.perf_counter()
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
 
-    end_time = time.perf_counter()
-    measured_time = end_time - start_time
-    print(f'Total runtime: {measured_time:0.4f} seconds')
-
-    move_actuator(test_data[MEASUREDDATA])
+    #move_actuator(test_data[MEASUREDDATA])
+    write_to_arduino("start")
+    write_to_arduino('20')
+    write_to_arduino('20')
+    write_to_arduino('20')
+    write_to_arduino("end")
     #move_actuator(['200.00', '560.00', '-150.00', '180.00'])
-    time.sleep(.5)
+    time.sleep(2)
+    sendmsg(CONNOMRON, MEASURE)
+    test_data = receive_data(CONNOMRON)
+    print(test_data)
     actuators_2neutral()
 
 if __name__ == '__main__':
@@ -208,6 +215,7 @@ if __name__ == '__main__':
     try:
         #handle_data(status)
         test_data = receive_data(CONNOMRON)
+        rotate(['906', '-628', '409', '47'])
         while True:
             test_program()
             time.sleep(1)
