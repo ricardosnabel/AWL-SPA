@@ -42,22 +42,22 @@ void setup() {
 }
 
 void stepper_innit(){
-  stepperX1.setMaxSpeed(400);
-  stepperX1.setAcceleration(100);
-  stepperX1.setSpeed(100);
-  stepperX2.setMaxSpeed(400);
-  stepperX2.setAcceleration(100);
-  stepperX2.setSpeed(100);
-  stepperY.setMaxSpeed(400);
-  stepperY.setAcceleration(100);
-  stepperY.setSpeed(100);
+  stepperX1.setMaxSpeed(1600);
+  stepperX1.setAcceleration(1600);
+  stepperX1.setSpeed(1600);
+  stepperX2.setMaxSpeed(1600);
+  stepperX2.setAcceleration(1600);
+  stepperX2.setSpeed(1600);
+  stepperY.setMaxSpeed(1600);
+  stepperY.setAcceleration(1600);
+  stepperY.setSpeed(1600);
 }
 
 void step_direction(int steps, int dirPin){
     if (steps >= 0)
-      digitalWrite(dirPin, true);
-    else
       digitalWrite(dirPin, false);
+    else
+      digitalWrite(dirPin, true);
 }
 
 void PulseSignal(int steps, int enaPin, int dirPin){
