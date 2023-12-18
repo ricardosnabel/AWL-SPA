@@ -198,40 +198,65 @@ def handle_data(status):
                 actuators_2neutral()
                 status = 'waiting for plate'
 
-def test_program():
+def test_program(step_amount):
+    time.sleep(1)
+    write_to_arduino("start")
+    write_to_arduino(step_amount)
+    write_to_arduino(step_amount)
+    #write_to_arduino(step_amount)
+    write_to_arduino("end")
+    time.sleep(1)
+    actuators_2neutral()
+    '''write_to_arduino("start")
+    write_to_arduino('10')
+    write_to_arduino('10')
+    #write_to_arduino('10')
+    write_to_arduino("end")
+    time.sleep(1)
+    actuators_2neutral()
+
+    write_to_arduino("start")
+    write_to_arduino('16')
+    write_to_arduino('16')
+    #write_to_arduino('16')
+    write_to_arduino("end")
+    time.sleep(1)
+    actuators_2neutral()
+
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
 
     move_actuator(test_data[MEASUREDDATA], True)
-    '''write_to_arduino("start")
-    write_to_arduino('20')
-    write_to_arduino('20')
-    write_to_arduino('20')
-    write_to_arduino("end")
     #move_actuator(['200.00', '560.00', '-150.00', '180.00'])
     time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
-    move_actuator(test_data[MEASUREDDATA], False)'''
+    move_actuator(test_data[MEASUREDDATA], False)
     time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
     actuators_2neutral()
     sendmsg(CONNOMRON, MEASURE)
-    print(receive_data(CONNOMRON)[MEASUREDDATA])
+    print(receive_data(CONNOMRON)[MEASUREDDATA])'''
 
 if __name__ == '__main__':
     #GPIO_init()
-    conn_init()
-    status = 'waiting for plate'
+    #conn_init()
+    #status = 'waiting for plate'
     try:
         #handle_data(status)
-        test_data = receive_data(CONNOMRON)
+        #test_data = receive_data(CONNOMRON)
         #rotate(['46', '-76', '-49', '99'])
-        test_program()
+        step_amount = 1
+        while step_amount <= 100:
+            test_program(step_amount)
+            if step_amount >= 10:
+                step_amount += 10
+            else:
+                step_amount += 1
         '''while True:
             test_program()
             time.sleep(1)
