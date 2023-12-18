@@ -97,7 +97,7 @@ def maxsteps_check(steps):
 
 def move_actuator(data, check):
     write_to_arduino("start")
-    if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 0 and check:
+    '''if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 0 and check:
         stepsToTake = rotate(data)
         print("Rotation: ", stepsToTake)
         if float(data[XAXISCAM0]) < 0.0:
@@ -114,10 +114,10 @@ def move_actuator(data, check):
         write_to_arduino(stepsToTake[YAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM2])
         write_to_arduino(stepsToTake[XAXISCAM0])
-    '''stepsToTake = convert_um2steps(convert_pixels2um(data))
-    write_to_arduino(stepsToTake[XAXISCAM0])
-    write_to_arduino(stepsToTake[YAXISCAM0])
-    write_to_arduino(stepsToTake[XAXISCAM2])'''
+    stepsToTake = convert_um2steps(convert_pixels2um(data))'''
+    write_to_arduino('0')
+    write_to_arduino('0')
+    write_to_arduino('160')
     write_to_arduino("end")
 
 def rotate(data):
@@ -209,17 +209,19 @@ def test_program():
     write_to_arduino('20')
     write_to_arduino('20')
     write_to_arduino("end")
-    #move_actuator(['200.00', '560.00', '-150.00', '180.00'])'''
+    #move_actuator(['200.00', '560.00', '-150.00', '180.00'])
     time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
-    move_actuator(test_data[MEASUREDDATA], False)
+    move_actuator(test_data[MEASUREDDATA], False)'''
     time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
     actuators_2neutral()
+    sendmsg(CONNOMRON, MEASURE)
+    print(receive_data(CONNOMRON)[MEASUREDDATA])
 
 if __name__ == '__main__':
     #GPIO_init()
