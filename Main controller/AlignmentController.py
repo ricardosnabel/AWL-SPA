@@ -16,7 +16,7 @@ DISTANCEY = 140000 / 2
 XMOTORDISTANCE = 92000 # distance between two translation points
 PIXELSIZE = 9.922
 STEPSIZE = .625
-MAXSTEPS = 1500 # test maximum
+MAXSTEPS = 7500 # test maximum
 LED = 11
 REDBUTTON = 16
 GREENBUTTON = 15
@@ -114,10 +114,6 @@ def move_actuator(data, check):
         write_to_arduino(stepsToTake[YAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM2])
         write_to_arduino(stepsToTake[XAXISCAM0])
-    '''stepsToTake = convert_um2steps(convert_pixels2um(data))
-    write_to_arduino('0')
-    write_to_arduino('0')
-    write_to_arduino('160')'''
     write_to_arduino("end")
 
 def rotate(data):
@@ -199,29 +195,14 @@ def handle_data(status):
                 status = 'waiting for plate'
 
 def test_program(step_amount):
-    time.sleep(1)
+    '''time.sleep(1)
     write_to_arduino("start")
     write_to_arduino(-step_amount)
     #write_to_arduino(-step_amount)
     #write_to_arduino(step_amount)
     write_to_arduino("end")
     time.sleep(1)
-    actuators_2neutral()
-    '''write_to_arduino("start")
-    write_to_arduino('10')
-    write_to_arduino('10')
-    #write_to_arduino('10')
-    write_to_arduino("end")
-    time.sleep(1)
-    actuators_2neutral()
-
-    write_to_arduino("start")
-    write_to_arduino('16')
-    write_to_arduino('16')
-    #write_to_arduino('16')
-    write_to_arduino("end")
-    time.sleep(1)
-    actuators_2neutral()
+    actuators_2neutral()'''
 
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
@@ -240,16 +221,15 @@ def test_program(step_amount):
     print(test_data[MEASUREDDATA])
     actuators_2neutral()
     sendmsg(CONNOMRON, MEASURE)
-    print(receive_data(CONNOMRON)[MEASUREDDATA])'''
+    print(receive_data(CONNOMRON)[MEASUREDDATA])
 
 if __name__ == '__main__':
     #GPIO_init()
-    #conn_init()
-    #status = 'waiting for plate'
+    conn_init()
+    status = 'waiting for plate'
     try:
-        #handle_data(status)
-        #test_data = receive_data(CONNOMRON)
-        #rotate(['46', '-76', '-49', '99'])
+        test_data = receive_data(CONNOMRON)
+        '''rotate(['46', '-76', '-49', '99'])
         step_amount = 16
         while step_amount <= 6000:
             test_program(step_amount)
@@ -258,11 +238,12 @@ if __name__ == '__main__':
             elif step_amount > 50 and step_amount < 300:
                 step_amount += 100
             else:
-                step_amount += 1000
-        '''while True:
-            test_program()
+                step_amount += 1000'''
+        while True:
+            #test_program()
+            handle_data(status)
             time.sleep(1)
-            if runApp == True:
+            '''if runApp == True:
                 test_program()
             elif runApp == False:
                 print("Program is off.")'''
