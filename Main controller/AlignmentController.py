@@ -201,7 +201,7 @@ def test_program():
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
-    move_actuator(test_data[MEASUREDDATA], False)
+    move_actuator(test_data[MEASUREDDATA], True)
     time.sleep(1)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
@@ -240,7 +240,7 @@ def test_program():
 if __name__ == '__main__':
     #GPIO_init()
     conn_init()
-    status = 'plate arrived'
+    #status = 'plate arrived'
     try:
         test_data = receive_data(CONNOMRON)
         '''rotate(['46', '-76', '-49', '99'])
@@ -254,8 +254,8 @@ if __name__ == '__main__':
             else:
                 step_amount += 1000'''
         while True:
-            #test_program()
-            handle_data(status)
+            test_program()
+            #handle_data(status)
             time.sleep(1)
             '''if runApp == True:
                 test_program()
