@@ -77,6 +77,7 @@ def convert_um2steps(data):
         stepsToTake = []
         for i in data:
             stepsToTake.append(maxsteps_check(i / STEPSIZE))
+    print("StepsToTake: ", stepsToTake)
     return stepsToTake
 
 def convert_pixels2um(data):
@@ -86,6 +87,7 @@ def convert_pixels2um(data):
         distInUm = []
         for i in data:
             distInUm.append(PIXELSIZE * float(i))
+    print("DistInUm: ", distInUm)
     return distInUm
 
 def maxsteps_check(steps):
@@ -110,10 +112,13 @@ def move_actuator(data, check):
             write_to_arduino(-abs(stepsToTake))
     else:
         stepsToTake = convert_um2steps(convert_pixels2um(data))
-        print("Translation: ", stepsToTake)
-        write_to_arduino(stepsToTake[YAXISCAM0])
-        write_to_arduino(stepsToTake[YAXISCAM2])
-        write_to_arduino(stepsToTake[XAXISCAM0])
+        #print("Translation: ", stepsToTake)
+        #write_to_arduino(stepsToTake[YAXISCAM0])
+        #write_to_arduino(stepsToTake[YAXISCAM2])
+        #write_to_arduino(stepsToTake[XAXISCAM0])
+    write_to_arduino(0)
+    time.sleep(1)
+    write_to_arduino(0)
     write_to_arduino("end")
 
 def rotate(data):
@@ -171,7 +176,7 @@ def handle_data(status):
                     print("waiting for plate")
                     status = 'plate arrived'
             case 'plate arrived':
-                actuators_2neutral()
+                #actuators_2neutral()
                 sendmsg(CONNOMRON, MEASURE)
                 data = receive_data(CONNOMRON)
                 if data[0][0] == 'OK\r':
@@ -183,7 +188,7 @@ def handle_data(status):
                 if data[1] == 'READY\r':
                     status = 'aligned'
                 else:
-                    move_actuator(data[MEASUREDDATA])
+                    move_actuator(data[MEASUREDDATA], False)
             case 'aligned':
                 sendmsg(CONNEXTERN, 'OK')
                 status = 'wait for external module'
@@ -226,7 +231,7 @@ def test_program(step_amount):
 if __name__ == '__main__':
     #GPIO_init()
     conn_init()
-    status = 'waiting for plate'
+    status = 'plate arrived'
     try:
         test_data = receive_data(CONNOMRON)
         '''rotate(['46', '-76', '-49', '99'])
