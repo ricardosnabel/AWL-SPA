@@ -116,9 +116,7 @@ def move_actuator(data, check):
         #write_to_arduino(stepsToTake[YAXISCAM0])
         #write_to_arduino(stepsToTake[YAXISCAM2])
         #write_to_arduino(stepsToTake[XAXISCAM0])
-    write_to_arduino(0)
-    time.sleep(1)
-    write_to_arduino(0)
+    write_to_arduino(2000)
     write_to_arduino("end")
 
 def rotate(data):
@@ -199,6 +197,18 @@ def handle_data(status):
                 actuators_2neutral()
                 status = 'waiting for plate'
 
+def test_program():
+    time.sleep(1)
+    sendmsg(CONNOMRON, MEASURE)
+    test_data = receive_data(CONNOMRON)
+    print(test_data[MEASUREDDATA])
+    move_actuator(test_data[MEASUREDDATA], False)
+    time.sleep(1)
+    sendmsg(CONNOMRON, MEASURE)
+    test_data = receive_data(CONNOMRON)
+    print(test_data[MEASUREDDATA])
+    actuators_2neutral()
+
 def test_program(step_amount):
     '''time.sleep(1)
     write_to_arduino("start")
@@ -231,7 +241,7 @@ def test_program(step_amount):
 if __name__ == '__main__':
     #GPIO_init()
     conn_init()
-    status = 'plate arrived'
+    #status = 'plate arrived'
     try:
         test_data = receive_data(CONNOMRON)
         '''rotate(['46', '-76', '-49', '99'])
@@ -245,9 +255,9 @@ if __name__ == '__main__':
             else:
                 step_amount += 1000'''
         while True:
-            #test_program()
-            handle_data(status)
-            time.sleep(1)
+            test_program()
+            #handle_data(status)
+            #time.sleep(1)
             '''if runApp == True:
                 test_program()
             elif runApp == False:

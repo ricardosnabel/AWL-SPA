@@ -54,10 +54,10 @@ void stepper_innit(){
 }
 
 void step_direction(int steps, int dirPin){
-    if (steps >= 0)
-      digitalWrite(dirPin, false);
-    else
+    if (steps > 0)
       digitalWrite(dirPin, true);
+    else
+      digitalWrite(dirPin, false);
 }
 
 void PulseSignal(int steps, int enaPin, int dirPin){
