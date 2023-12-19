@@ -201,8 +201,8 @@ def handle_data(status):
 def test_program(step_amount):
     time.sleep(1)
     write_to_arduino("start")
-    write_to_arduino(step_amount)
-    write_to_arduino(step_amount)
+    write_to_arduino(-step_amount)
+    write_to_arduino(-step_amount)
     #write_to_arduino(step_amount)
     write_to_arduino("end")
     time.sleep(1)
@@ -250,13 +250,10 @@ if __name__ == '__main__':
         #handle_data(status)
         #test_data = receive_data(CONNOMRON)
         #rotate(['46', '-76', '-49', '99'])
-        step_amount = 1
+        step_amount = 16
         while step_amount <= 100:
             test_program(step_amount)
-            if step_amount >= 10:
-                step_amount += 10
-            else:
-                step_amount += 1
+            step_amount += 16
         '''while True:
             test_program()
             time.sleep(1)
