@@ -202,7 +202,7 @@ def test_program(step_amount):
     time.sleep(1)
     write_to_arduino("start")
     write_to_arduino(-step_amount)
-    write_to_arduino(-step_amount)
+    #write_to_arduino(-step_amount)
     #write_to_arduino(step_amount)
     write_to_arduino("end")
     time.sleep(1)
