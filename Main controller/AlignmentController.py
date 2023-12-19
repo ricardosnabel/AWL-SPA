@@ -251,9 +251,14 @@ if __name__ == '__main__':
         #test_data = receive_data(CONNOMRON)
         #rotate(['46', '-76', '-49', '99'])
         step_amount = 16
-        while step_amount <= 100:
+        while step_amount <= 6000:
             test_program(step_amount)
-            step_amount += 16
+            if step_amount < 50:
+                step_amount += 16
+            elif step_amount > 50 and step_amount < 300:
+                step_amount += 100
+            else:
+                step_amount += 1000
         '''while True:
             test_program()
             time.sleep(1)
