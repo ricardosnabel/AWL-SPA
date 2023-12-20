@@ -103,14 +103,8 @@ def move_actuator(data, check):
     if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 0 and check:
         stepsToTake = rotate(data)
         print("Rotation: ", stepsToTake)
-        if float(data[XAXISCAM0]) < 0.0:
-            write_to_arduino(abs(stepsToTake))
-        else:
-            write_to_arduino(-abs(stepsToTake))
-        if float(data[XAXISCAM2]) < 0.0:
-            write_to_arduino(abs(stepsToTake))
-        else:
-            write_to_arduino(-abs(stepsToTake))
+        write_to_arduino(abs(stepsToTake[0])) if float(data[XAXISCAM0]) < 0.0 else write_to_arduino(-abs(stepsToTake[0]))
+        write_to_arduino(abs(stepsToTake[1])) if float(data[XAXISCAM2]) < 0.0 else write_to_arduino(-abs(stepsToTake[1]))
     else:
         stepsToTake = convert_um2steps(convert_pixels2um(data))
         #print("Translation: ", stepsToTake)
@@ -120,21 +114,28 @@ def move_actuator(data, check):
     write_to_arduino("end")
 
 def rotate(data):
-    epsilon = abs(convert_pixels2um(float(data[XAXISCAM0])) - convert_pixels2um(float(data[XAXISCAM2])))
+    xPos0 = float(data[XAXISCAM0])
+    xPos2 = float(data[XAXISCAM2])
+    epsilon = abs(convert_pixels2um(xPos0) - convert_pixels2um(xPos2))
     n = ((4 / (XMOTORDISTANCE * XMOTORDISTANCE)) * ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
     m = ((2*epsilon) / XMOTORDISTANCE) * DISTANCEY
     p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
     sqrtcalc = math.sqrt((m*m) - (4 * n * p))
     d = ((-m - sqrtcalc) / (2 * n)) - DZEROVALUE
     stepsToTake = convert_um2steps(d)
+    if xPos0 > xPos2:
+        stepsToTake = [stepsToTake, stepsToTake * (xPos0 / xPos2)]
+    elif xPos2 > xPos0:
+        stepsToTake = [stepsToTake * (xPos2 / xPos0), stepsToTake]
     print("Epsilon: ", epsilon)
     print("N: ", n)
     print("M: ", m)
     print("P: ", p)
     print("Sqrtcalc: ", sqrtcalc)
-    print("D: ", d)
+    print("d: ", d)
+    print("Steps: ", stepsToTake)
     print()
-    return stepsToTake*2
+    return stepsToTake
 
 def actuators_2neutral():
     write_to_arduino("start")
