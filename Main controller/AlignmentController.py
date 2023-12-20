@@ -140,7 +140,7 @@ def rotate(data):
     print("d: ", d)
     print("Steps: ", stepsToTake)
     print()
-    return stepsToTake + (stepsToTake * posDif)
+    return stepsToTake*2 #+ (stepsToTake * posDif)
 
 def actuators_2neutral():
     write_to_arduino("start")
