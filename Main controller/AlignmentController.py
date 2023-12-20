@@ -120,7 +120,7 @@ def move_actuator(data, check):
     write_to_arduino("end")
 
 def rotate(data):
-    epsilon = abs(convert_pixels2um(float(data[XAXISCAM0]))) - abs(convert_pixels2um(float(data[XAXISCAM2])))
+    epsilon = abs(convert_pixels2um(float(data[XAXISCAM0])) - convert_pixels2um(float(data[XAXISCAM2])))
     n = ((4 / (XMOTORDISTANCE * XMOTORDISTANCE)) * ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
     m = ((2*epsilon) / XMOTORDISTANCE) * DISTANCEY
     p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
@@ -134,7 +134,7 @@ def rotate(data):
     print("Sqrtcalc: ", sqrtcalc)
     print("D: ", d)
     print()
-    return stepsToTake
+    return stepsToTake*2
 
 def actuators_2neutral():
     write_to_arduino("start")
