@@ -124,9 +124,9 @@ def rotate(data):
     d = ((-m - sqrtcalc) / (2 * n)) - DZEROVALUE
     stepsToTake = convert_um2steps(d)
     if abs(xPos0) > abs(xPos2):
-        stepsToTake = [stepsToTake, stepsToTake * (xPos0 / xPos2)]
+        stepsToTake = [stepsToTake, stepsToTake * (abs(xPos0) / abs(xPos2))]
     elif abs(xPos2) > abs(xPos0):
-        stepsToTake = [stepsToTake * (xPos2 / xPos0), stepsToTake]
+        stepsToTake = [stepsToTake * (abs(xPos2) / abs(xPos0)), stepsToTake]
     print("Epsilon: ", epsilon)
     print("N: ", n)
     print("M: ", m)
