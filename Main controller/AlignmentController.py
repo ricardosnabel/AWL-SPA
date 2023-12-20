@@ -103,8 +103,11 @@ def move_actuator(data, check):
     if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 0 and check:
         stepsToTake = rotate(data)
         print("Rotation: ", stepsToTake)
-        write_to_arduino(abs(stepsToTake[0])) if float(data[XAXISCAM0]) < 0.0 else write_to_arduino(-abs(stepsToTake[0]))
-        write_to_arduino(abs(stepsToTake[1])) if float(data[XAXISCAM2]) < 0.0 else write_to_arduino(-abs(stepsToTake[1]))
+        if abs(float(data[XAXISCAM0])) > abs(float(data[XAXISCAM2])):
+            write_to_arduino(abs(stepsToTake)) if float(data[XAXISCAM0]) < 0.0 else write_to_arduino(-stepsToTake)
+        else:
+            write_to_arduino(0)
+            write_to_arduino(abs(stepsToTake)) if float(data[XAXISCAM2]) < 0.0 else write_to_arduino(-stepsToTake)
     else:
         stepsToTake = convert_um2steps(convert_pixels2um(data))
         #print("Translation: ", stepsToTake)
@@ -122,11 +125,13 @@ def rotate(data):
     p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
     sqrtcalc = math.sqrt((m*m) - (4 * n * p))
     d = ((-m - sqrtcalc) / (2 * n)) - DZEROVALUE
-    stepsToTake = convert_um2steps(d)
+    stepsToTake = abs(convert_um2steps(d))
     if abs(xPos0) > abs(xPos2):
-        stepsToTake = [stepsToTake, stepsToTake * (abs(xPos0) / abs(xPos2))]
+        #stepsToTake = [stepsToTake, stepsToTake * (abs(xPos0) / abs(xPos2))]
+        posDif = abs(xPos0) / abs(xPos2)
     elif abs(xPos2) > abs(xPos0):
-        stepsToTake = [stepsToTake * (abs(xPos2) / abs(xPos0)), stepsToTake]
+        #stepsToTake = [stepsToTake * (abs(xPos2) / abs(xPos0)), stepsToTake]
+        posDif = abs(xPos2) / abs(xPos0)
     print("Epsilon: ", epsilon)
     print("N: ", n)
     print("M: ", m)
@@ -135,7 +140,7 @@ def rotate(data):
     print("d: ", d)
     print("Steps: ", stepsToTake)
     print()
-    return stepsToTake
+    return stepsToTake + (stepsToTake * posDif)
 
 def actuators_2neutral():
     write_to_arduino("start")
