@@ -116,7 +116,7 @@ def move_actuator(data, check):
         #print("Translation: ", stepsToTake)
         write_to_arduino(stepsToTake[YAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM2])
-        write_to_arduino(stepsToTake[XAXISCAM0])
+        #write_to_arduino(stepsToTake[XAXISCAM0])
     write_to_arduino("end")
 
 def rotate(data):
@@ -210,7 +210,7 @@ def test_program():
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
-    move_actuator(test_data[MEASUREDDATA], True)
+    move_actuator(test_data[MEASUREDDATA], False)
     time.sleep(1)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
