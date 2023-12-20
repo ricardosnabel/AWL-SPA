@@ -14,6 +14,7 @@ LAYOUT = 'DLN 0 1'
 DISTANCEX = 262500 / 2
 DISTANCEY = 140000 / 2
 XMOTORDISTANCE = 92000 # distance between two translation points
+DZEROVALUE = -40588.23529411765
 PIXELSIZE = 9.922
 STEPSIZE = .625
 MAXSTEPS = 7500 # test maximum
@@ -119,21 +120,20 @@ def move_actuator(data, check):
     write_to_arduino("end")
 
 def rotate(data):
-    epsilon = abs(convert_pixels2um(float(data[XAXISCAM0])) - convert_pixels2um(float(data[XAXISCAM2])))
+    epsilon = abs(convert_pixels2um(float(data[XAXISCAM0]))) - abs(convert_pixels2um(float(data[XAXISCAM2])))
     n = ((4 / (XMOTORDISTANCE * XMOTORDISTANCE)) * ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
-    m = (((DISTANCEY*2) * epsilon) / XMOTORDISTANCE)
-    p = ((epsilon * epsilon) / 4) - DISTANCEX
-    sqrtcalc = (m*m) - (4 * n * p)
-    calc = (m - math.sqrt(abs(sqrtcalc))) / (2 * n)
-    stepsToTake = convert_um2steps(calc)
-    if sqrtcalc < 0:
-        stepsToTake = -stepsToTake
+    m = ((2*epsilon) / XMOTORDISTANCE) * DISTANCEY
+    p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
+    sqrtcalc = math.sqrt((m*m) - (4 * n * p))
+    d = ((-m - sqrtcalc) / (2 * n)) - DZEROVALUE
+    stepsToTake = convert_um2steps(d)
     print("Epsilon: ", epsilon)
     print("N: ", n)
     print("M: ", m)
     print("P: ", p)
-    print("Calc: ", calc)
-    print("Steps: ", stepsToTake)
+    print("Sqrtcalc: ", sqrtcalc)
+    print("D: ", d)
+    print()
     return stepsToTake
 
 def actuators_2neutral():
