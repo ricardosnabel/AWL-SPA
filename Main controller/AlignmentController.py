@@ -114,8 +114,8 @@ def move_actuator(data, check):
     else:
         stepsToTake = convert_um2steps(convert_pixels2um(data))
         #print("Translation: ", stepsToTake)
-        write_to_arduino(stepsToTake[YAXISCAM0])
-        write_to_arduino(stepsToTake[YAXISCAM2])
+        write_to_arduino(stepsToTake[YAXISCAM0]/2)
+        write_to_arduino(stepsToTake[YAXISCAM2]/2)
         #write_to_arduino(stepsToTake[XAXISCAM0])
     write_to_arduino("end")
 
@@ -147,9 +147,9 @@ def rotate(data):
 
 def actuators_2neutral():
     write_to_arduino("start")
-    write_to_arduino('0')
-    write_to_arduino('0')
-    write_to_arduino('0')
+    write_to_arduino(0)
+    write_to_arduino(0)
+    write_to_arduino(0)
     write_to_arduino("end")
 
 def handle_greenbutton(channel):
@@ -206,12 +206,12 @@ def handle_data(status):
                 status = 'waiting for plate'
 
 def test_program():
-    time.sleep(1)
+    time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
     move_actuator(test_data[MEASUREDDATA], False)
-    time.sleep(1)
+    time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
