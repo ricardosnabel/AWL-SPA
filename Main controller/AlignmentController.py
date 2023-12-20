@@ -112,11 +112,13 @@ def move_actuator(data, check):
             write_to_arduino(0)
             write_to_arduino(abs(stepsToTake)) if float(data[XAXISCAM2]) < 0.0 else write_to_arduino(-stepsToTake)'''
     else:
-        stepsToTake = convert_um2steps(convert_pixels2um(data))
         diff = abs(float(data[YAXISCAM0])) - abs(float((data[YAXISCAM2]))) / 2
+        data[YAXISCAM0] = float(data[YAXISCAM0]) - diff
+        data[YAXISCAM2] = float(data[YAXISCAM2]) - diff
+        stepsToTake = convert_um2steps(convert_pixels2um(data))
         #print("Translation: ", stepsToTake)
-        write_to_arduino((stepsToTake[YAXISCAM0] - diff) / 2)
-        write_to_arduino((stepsToTake[YAXISCAM2] - diff) / 2)
+        write_to_arduino(stepsToTake[YAXISCAM0] / 2)
+        write_to_arduino(stepsToTake[YAXISCAM2] / 2)
         #write_to_arduino(stepsToTake[XAXISCAM0])
     write_to_arduino("end")
 
