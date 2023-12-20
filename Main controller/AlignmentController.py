@@ -101,13 +101,16 @@ def maxsteps_check(steps):
 def move_actuator(data, check):
     write_to_arduino("start")
     if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 0 and check:
-        stepsToTake = rotate(data)
+        stepsToTake = convert_um2steps(convert_pixels2um(data))
+        write_to_arduino(stepsToTake[YAXISCAM0])
+        write_to_arduino(stepsToTake[YAXISCAM2])
+        '''stepsToTake = rotate(data)
         print("Rotation: ", stepsToTake)
         if abs(float(data[XAXISCAM0])) > abs(float(data[XAXISCAM2])):
             write_to_arduino(abs(stepsToTake)) if float(data[XAXISCAM0]) < 0.0 else write_to_arduino(-stepsToTake)
         else:
             write_to_arduino(0)
-            write_to_arduino(abs(stepsToTake)) if float(data[XAXISCAM2]) < 0.0 else write_to_arduino(-stepsToTake)
+            write_to_arduino(abs(stepsToTake)) if float(data[XAXISCAM2]) < 0.0 else write_to_arduino(-stepsToTake)'''
     else:
         stepsToTake = convert_um2steps(convert_pixels2um(data))
         #print("Translation: ", stepsToTake)
