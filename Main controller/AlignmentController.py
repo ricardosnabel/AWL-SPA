@@ -54,9 +54,9 @@ def receive_data(sock):
             return fragments
 
 def write_to_arduino(data):
-    time.sleep(2)
+    time.sleep(5)
     ARDUINO.write(str.encode(str(data)))
-    time.sleep(2)
+    time.sleep(5)
 
 def read_arduino():
     while True:
@@ -151,7 +151,7 @@ def handle_data(status):
                 if data[1] == 'READY\r':
                     status = 'aligned'
                 else:
-                    time.sleep(2)
+                    #time.sleep(5)
                     move_actuator(data[MEASUREDDATA])
             case 'aligned':
                 sendmsg(CONNEXTERN, 'OK')
