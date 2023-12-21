@@ -42,15 +42,15 @@ void setup() {
 }
 
 void stepper_innit(){
-  stepperX1.setMaxSpeed(1600);
-  stepperX1.setAcceleration(200);
-  stepperX1.setSpeed(1600);
-  stepperX2.setMaxSpeed(1600);
-  stepperX2.setAcceleration(200);
-  stepperX2.setSpeed(1600);
-  stepperY.setMaxSpeed(1600);
-  stepperY.setAcceleration(200);
-  stepperY.setSpeed(1600);
+  stepperX1.setMaxSpeed(3200);
+  stepperX1.setAcceleration(400);
+  stepperX1.setSpeed(3200);
+  stepperX2.setMaxSpeed(3200);
+  stepperX2.setAcceleration(400);
+  stepperX2.setSpeed(3200);
+  stepperY.setMaxSpeed(3200);
+  stepperY.setAcceleration(400);
+  stepperY.setSpeed(3200);
 }
 
 void step_direction(int steps, int dirPin){
