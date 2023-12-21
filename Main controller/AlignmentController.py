@@ -90,22 +90,16 @@ def move_actuator(data):
     YDiff = abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2]))
     if abs(float(data[YAXISCAM0])) > 2.0 or abs(float(data[YAXISCAM2])) > 2.0:
         if YDiff > 5:
-            diff = abs(abs(float(data[YAXISCAM0])) - abs(float((data[YAXISCAM2]))))
-            relPos0 = (float(data[YAXISCAM0]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
-            relPos2 = (float(data[YAXISCAM2]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
-            print(data[YAXISCAM2])
-            print(data[YAXISCAM0])
-            data[YAXISCAM0] = float(data[YAXISCAM0]) - relPos0
-            data[YAXISCAM2] = float(data[YAXISCAM2]) - relPos2
+            data[YAXISCAM0] *= (float(data[YAXISCAM0]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
+            data[YAXISCAM2] *= (float(data[YAXISCAM2]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             print(data[YAXISCAM2])
             print(data[YAXISCAM0])
             stepsToTake = convert_pixels2steps(data)
-            write_to_arduino(stepsToTake[YAXISCAM0] / 2)
-            write_to_arduino(stepsToTake[YAXISCAM2] / 2)
+            stepsToTake[YAXISCAM0] /= 2
+            stepsToTake[YAXISCAM2] /= 2
             print("werkt1")
-        else:
-            write_to_arduino(stepsToTake[YAXISCAM0])
-            write_to_arduino(stepsToTake[YAXISCAM2])
+        write_to_arduino(stepsToTake[YAXISCAM0])
+        write_to_arduino(stepsToTake[YAXISCAM2])
         print("Steps: ", stepsToTake)
     else:
         stepsToTake = convert_pixels2steps(data)
