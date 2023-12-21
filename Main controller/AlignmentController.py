@@ -98,7 +98,7 @@ def maxsteps_check(steps):
         steps = -MAXSTEPS
     return steps
 
-def move_actuator(data, check, prevStepsTaken):
+def move_actuator(data, check):
     write_to_arduino("start")
     if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 0 and check:
         stepsToTake = convert_um2steps(convert_pixels2um(data))
@@ -112,11 +112,13 @@ def move_actuator(data, check, prevStepsTaken):
             write_to_arduino(0)
             write_to_arduino(abs(stepsToTake)) if float(data[XAXISCAM2]) < 0.0 else write_to_arduino(-stepsToTake)'''
     else:
-        diff = abs(float(data[YAXISCAM0])) - abs(float((data[YAXISCAM2])))
+        diff = abs(float(data[YAXISCAM0]) - float((data[YAXISCAM2])))
         relPos0 = (100 / (abs(float(data[YAXISCAM0]) - float((data[YAXISCAM2])))) * float(data[YAXISCAM0])) / 100 * diff
         relPos2 = (100 / (abs(float(data[YAXISCAM0]) - float((data[YAXISCAM2])))) * float(data[YAXISCAM2])) / 100 * diff
+        print(data[YAXISCAM2])
         data[YAXISCAM2] = float(data[YAXISCAM2]) - relPos2
         data[YAXISCAM0] = float(data[YAXISCAM0]) - relPos0
+        print(data[YAXISCAM2])
         stepsToTake = convert_um2steps(convert_pixels2um(data))
         #write_to_arduino(MAXSTEPS) if (stepsToTake[YAXISCAM0] / 2) + prevStepsTaken[0] > MAXSTEPS else write_to_arduino((stepsToTake[YAXISCAM0] / 2) + prevStepsTaken[0])
         #write_to_arduino(MAXSTEPS) if (stepsToTake[YAXISCAM2] / 2) + prevStepsTaken[0] > MAXSTEPS else write_to_arduino((stepsToTake[YAXISCAM2] / 2) + prevStepsTaken[1])
@@ -127,7 +129,6 @@ def move_actuator(data, check, prevStepsTaken):
         #write_to_arduino(stepsToTake[XAXISCAM0] / 2)
         prevStepsTaken = [(stepsToTake[YAXISCAM0] / 2), (stepsToTake[YAXISCAM2] / 2), 0]
     write_to_arduino("end")
-    return prevStepsTaken
 
 def rotate(data):
     xPos0 = float(data[XAXISCAM0])
@@ -216,32 +217,31 @@ def handle_data(status):
                 status = 'waiting for plate'
 
 def test_program():
-    prevStepsTaken = [0, 0, 0]
     time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
-    prevStepsTaken = move_actuator(test_data[MEASUREDDATA], False, prevStepsTaken)
+    move_actuator(test_data[MEASUREDDATA], False)
     time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
-    prevStepsTaken = move_actuator(test_data[MEASUREDDATA], False, prevStepsTaken)
+    move_actuator(test_data[MEASUREDDATA], False)
     time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
-    prevStepsTaken = move_actuator(test_data[MEASUREDDATA], False, prevStepsTaken)
+    move_actuator(test_data[MEASUREDDATA], False)
     time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
-    prevStepsTaken = move_actuator(test_data[MEASUREDDATA], False, prevStepsTaken)
+    move_actuator(test_data[MEASUREDDATA], False)
     time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
-    actuators_2neutral()
+    #actuators_2neutral()
 
 '''def test_program(step_amount):
     time.sleep(1)
