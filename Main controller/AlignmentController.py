@@ -98,17 +98,14 @@ def move_actuator(data):
             stepsToTake = convert_pixels2steps(data)
             stepsToTake[YAXISCAM0] /= 2
             stepsToTake[YAXISCAM2] /= 2
-            print("werkt1")
         write_to_arduino(stepsToTake[YAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM2])
         print("Steps: ", stepsToTake)
     else:
         stepsToTake = convert_pixels2steps(data)
-        #print("Translation: ", stepsToTake)
         write_to_arduino(0)
         write_to_arduino(0)
         write_to_arduino(stepsToTake[XAXISCAM0])
-        print("werkt3")
     write_to_arduino("end")
 
 def handle_greenbutton(channel):
@@ -149,7 +146,7 @@ def handle_data(status):
                 sendmsg(CONNOMRON, MEASURE)
                 data = receive_data(CONNOMRON)
                 print(data[MEASUREDDATA])
-                if data[1] == 'READY\r':
+                if data[1][0] == 'READY\r':
                     status = 'aligned'
                 else:
                     #time.sleep(5)
@@ -162,16 +159,6 @@ def handle_data(status):
                     status = 'return to neutral'
             case 'return to neutral':
                 status = 'waiting for plate'
-
-def test_program():
-    time.sleep(2)
-    sendmsg(CONNOMRON, MEASURE)
-    test_data = receive_data(CONNOMRON)
-    print(test_data[MEASUREDDATA])
-    move_actuator(test_data[MEASUREDDATA])
-    sendmsg(CONNOMRON, MEASURE)
-    test_data = receive_data(CONNOMRON)
-    print(test_data[MEASUREDDATA])
 
 if __name__ == '__main__':
     #GPIO_init()
