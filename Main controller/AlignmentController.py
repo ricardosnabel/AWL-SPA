@@ -72,13 +72,10 @@ def convert_pixels2steps(data):
         distInUm = PIXELSIZE * data
         stepsToTake = maxsteps_check(distInUm / STEPSIZE)
     else:
-        distInUm = []
         stepsToTake = []
         for i in data:
-            distInUmCalc = PIXELSIZE * float(i)
-            distInUm.append = distInUmCalc
-            stepsToTake.append(maxsteps_check(distInUmCalc / STEPSIZE))
-    print("DistInUm: ", distInUm)
+            distInUm = PIXELSIZE * float(i)
+            stepsToTake.append(maxsteps_check(distInUm / STEPSIZE))
     print("StepsToTake: ", stepsToTake)
     return stepsToTake
 
@@ -89,9 +86,9 @@ def maxsteps_check(steps):
         steps = -MAXSTEPS
     return steps
 
-def move_actuator(data, check):
+def move_actuator(data):
     write_to_arduino("start")
-    if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 0 and check:
+    if abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2])) > 5:
         diff = abs(abs(float(data[YAXISCAM0])) - abs(float((data[YAXISCAM2]))))
         relPos0 = (float(data[YAXISCAM0]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
         relPos2 = (float(data[YAXISCAM2]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
@@ -106,7 +103,7 @@ def move_actuator(data, check):
         stepsToTake = convert_pixels2steps(data)
         #print("Translation: ", stepsToTake)
         write_to_arduino(stepsToTake[YAXISCAM0])
-        write_to_arduino(stepsToTake[YAXISCAM2])
+        write_to_arduino(stepsToTake[YAXISCAM0])
         write_to_arduino(stepsToTake[XAXISCAM0])
     write_to_arduino("end")
 
@@ -166,7 +163,7 @@ def test_program():
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
-    move_actuator(test_data[MEASUREDDATA], False)
+    move_actuator(test_data[MEASUREDDATA])
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
