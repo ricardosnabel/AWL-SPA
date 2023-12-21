@@ -75,6 +75,31 @@ def rotate(data):
     print()
     return stepsToTake
 
+def move_actuator(data):
+    print("Data: ", data)
+
+    diff = abs(abs(float(data[YAXISCAM0])) - abs(float((data[YAXISCAM2]))))
+    relPos0 = (float(data[YAXISCAM0]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
+    relPos2 = (float(data[YAXISCAM2]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
+
+    print("Diff: ", diff)
+    print("Relpos0: ", relPos0)
+    print("Relpos2: ", relPos2)
+    print("YAxisCam0: ", data[YAXISCAM0])
+    print("YAxisCam2: ", data[YAXISCAM2])
+
+    data[YAXISCAM2] = float(data[YAXISCAM2]) - relPos2
+    data[YAXISCAM0] = float(data[YAXISCAM0]) - relPos0
+
+    print("YAxisCam0: ", data[YAXISCAM0])
+    print("YAxisCam2: ", data[YAXISCAM2])
+
+    stepsToTake = convert_um2steps(convert_pixels2um(data))
+
+    print("StepsYAxisCam0: ", stepsToTake[YAXISCAM0] / 2)
+    print("StepsYAxisCam2: ", stepsToTake[YAXISCAM2] / 2)
+    print()
+
 # current calculations on the rotations.
 '''def rotate(data):
     epsilon = abs(convert_pixels2um(float(data[XAXISCAM0])) - convert_pixels2um(float(data[XAXISCAM2])))
@@ -97,26 +122,10 @@ def rotate(data):
 if __name__ == '__main__':
     # originele dataset = ['-265.8202', '478.1003', '149.0438', '-339.4766']
 
-    data = ['-265.8202', '478.1003', '149.0438', '-339.4766']
+    data = ['-24.5077', '356.2894', '16.6148', '169.1143\r']
     print("Test 1: ")
-    rotate(data)
-
-    data = ['0', '478.1003', '0', '339.4766']
-    print("Test 2: ")
-    rotate(data)
+    move_actuator(data)
     
-    data = ['150.7587', '-305.0539', '-162.8676', '205.9440']
-    print("Test 3: ")
-    rotate(data)
-
-    data = ['20', '478.1003', '25', '339.4766']
-    print("Test 4: ")
-    rotate(data)
-
-    '''data = ['26.8202', '478.1003', '-149.0438', '339.4766']
-    print("Test 5: ")
-    rotate(data)
-
-    data = ['0', '478.1003', '0', '339.4766']
-    print("Test 6: ")
-    rotate(data)'''
+    data = ['-24.5077', '-16.1143', '16.6148', '-356.2894\r']
+    print("Test 2: ")
+    move_actuator(data)

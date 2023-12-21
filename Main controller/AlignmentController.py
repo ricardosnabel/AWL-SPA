@@ -11,10 +11,6 @@ XAXISCAM2 = 2
 YAXISCAM2 = 3
 MEASURE = 'M'
 LAYOUT = 'DLN 0 1'
-DISTANCEX = 262500 / 2
-DISTANCEY = 140000 / 2
-XMOTORDISTANCE = 92000 # distance between two translation points
-DZEROVALUE = -40588.23529411765
 PIXELSIZE = 9.922
 STEPSIZE = .625
 MAXSTEPS = 7500 # test maximum
@@ -71,25 +67,20 @@ def read_arduino():
             break
         print(recv)
 
-def convert_um2steps(data):
-    if isinstance(data, float):
-        stepsToTake = maxsteps_check(data / STEPSIZE)
-    else:
-        stepsToTake = []
-        for i in data:
-            stepsToTake.append(maxsteps_check(i / STEPSIZE))
-    print("StepsToTake: ", stepsToTake)
-    return stepsToTake
-
-def convert_pixels2um(data):
+def convert_pixels2steps(data):
     if isinstance(data, float):
         distInUm = PIXELSIZE * data
+        stepsToTake = maxsteps_check(distInUm / STEPSIZE)
     else:
         distInUm = []
+        stepsToTake = []
         for i in data:
-            distInUm.append(PIXELSIZE * float(i))
+            distInUmCalc = PIXELSIZE * float(i)
+            distInUm.append = distInUmCalc
+            stepsToTake.append(maxsteps_check(distInUmCalc / STEPSIZE))
     print("DistInUm: ", distInUm)
-    return distInUm
+    print("StepsToTake: ", stepsToTake)
+    return stepsToTake
 
 def maxsteps_check(steps):
     if steps > MAXSTEPS:
@@ -101,66 +92,22 @@ def maxsteps_check(steps):
 def move_actuator(data, check):
     write_to_arduino("start")
     if abs(float(data[XAXISCAM0]) - float(data[XAXISCAM2])) > 0 and check:
-        stepsToTake = convert_um2steps(convert_pixels2um(data))
-        write_to_arduino(stepsToTake[YAXISCAM0])
-        write_to_arduino(stepsToTake[YAXISCAM2])
-        '''stepsToTake = rotate(data)
-        print("Rotation: ", stepsToTake)
-        if abs(float(data[XAXISCAM0])) > abs(float(data[XAXISCAM2])):
-            write_to_arduino(abs(stepsToTake)) if float(data[XAXISCAM0]) < 0.0 else write_to_arduino(-stepsToTake)
-        else:
-            write_to_arduino(0)
-            write_to_arduino(abs(stepsToTake)) if float(data[XAXISCAM2]) < 0.0 else write_to_arduino(-stepsToTake)'''
-    else:
-        diff = abs(float(data[YAXISCAM0]) - float((data[YAXISCAM2])))
-        relPos0 = (100 / (abs(float(data[YAXISCAM0]) - float((data[YAXISCAM2])))) * float(data[YAXISCAM0])) / 100 * diff
-        relPos2 = (100 / (abs(float(data[YAXISCAM0]) - float((data[YAXISCAM2])))) * float(data[YAXISCAM2])) / 100 * diff
+        diff = abs(abs(float(data[YAXISCAM0])) - abs(float((data[YAXISCAM2]))))
+        relPos0 = (float(data[YAXISCAM0]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
+        relPos2 = (float(data[YAXISCAM2]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
         print(data[YAXISCAM2])
-        data[YAXISCAM2] = float(data[YAXISCAM2]) - relPos2
         data[YAXISCAM0] = float(data[YAXISCAM0]) - relPos0
+        data[YAXISCAM2] = float(data[YAXISCAM2]) - relPos2
         print(data[YAXISCAM2])
-        stepsToTake = convert_um2steps(convert_pixels2um(data))
-        #write_to_arduino(MAXSTEPS) if (stepsToTake[YAXISCAM0] / 2) + prevStepsTaken[0] > MAXSTEPS else write_to_arduino((stepsToTake[YAXISCAM0] / 2) + prevStepsTaken[0])
-        #write_to_arduino(MAXSTEPS) if (stepsToTake[YAXISCAM2] / 2) + prevStepsTaken[0] > MAXSTEPS else write_to_arduino((stepsToTake[YAXISCAM2] / 2) + prevStepsTaken[1])
-        #write_to_arduino(MAXSTEPS) if (stepsToTake[YAXISCAM0] / 2) + prevStepsTaken[0] > MAXSTEPS else write_to_arduino((stepsToTake[XAXISCAM0] / 2) + prevStepsTaken[2])
-        #print("Translation: ", stepsToTake)
+        stepsToTake = convert_pixels2steps(data)
         write_to_arduino(stepsToTake[YAXISCAM0] / 2)
         write_to_arduino(stepsToTake[YAXISCAM2] / 2)
-        #write_to_arduino(stepsToTake[XAXISCAM0] / 2)
-        prevStepsTaken = [(stepsToTake[YAXISCAM0] / 2), (stepsToTake[YAXISCAM2] / 2), 0]
-    write_to_arduino("end")
-
-def rotate(data):
-    xPos0 = float(data[XAXISCAM0])
-    xPos2 = float(data[XAXISCAM2])
-    epsilon = abs(convert_pixels2um(xPos0) - convert_pixels2um(xPos2))
-    n = ((4 / (XMOTORDISTANCE * XMOTORDISTANCE)) * ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
-    m = ((2*epsilon) / XMOTORDISTANCE) * DISTANCEY
-    p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
-    sqrtcalc = math.sqrt((m*m) - (4 * n * p))
-    d = ((-m - sqrtcalc) / (2 * n)) - DZEROVALUE
-    stepsToTake = abs(convert_um2steps(d))
-    if abs(xPos0) > abs(xPos2):
-        #stepsToTake = [stepsToTake, stepsToTake * (abs(xPos0) / abs(xPos2))]
-        posDif = abs(xPos0) / abs(xPos2)
-    elif abs(xPos2) > abs(xPos0):
-        #stepsToTake = [stepsToTake * (abs(xPos2) / abs(xPos0)), stepsToTake]
-        posDif = abs(xPos2) / abs(xPos0)
-    print("Epsilon: ", epsilon)
-    print("N: ", n)
-    print("M: ", m)
-    print("P: ", p)
-    print("Sqrtcalc: ", sqrtcalc)
-    print("d: ", d)
-    print("Steps: ", stepsToTake)
-    print()
-    return stepsToTake + (stepsToTake * posDif)
-
-def actuators_2neutral():
-    write_to_arduino("start")
-    write_to_arduino(0)
-    write_to_arduino(0)
-    write_to_arduino(0)
+    else:
+        stepsToTake = convert_pixels2steps(data)
+        #print("Translation: ", stepsToTake)
+        write_to_arduino(stepsToTake[YAXISCAM0])
+        write_to_arduino(stepsToTake[YAXISCAM2])
+        write_to_arduino(stepsToTake[XAXISCAM0])
     write_to_arduino("end")
 
 def handle_greenbutton(channel):
@@ -193,7 +140,6 @@ def handle_data(status):
                     print("waiting for plate")
                     status = 'plate arrived'
             case 'plate arrived':
-                actuators_2neutral()
                 sendmsg(CONNOMRON, MEASURE)
                 data = receive_data(CONNOMRON)
                 if data[0][0] == 'OK\r':
@@ -213,7 +159,6 @@ def handle_data(status):
                 if receive_data(CONNEXTERN) == 'OK\r':
                     status = 'return to neutral'
             case 'return to neutral':
-                actuators_2neutral()
                 status = 'waiting for plate'
 
 def test_program():
@@ -222,55 +167,9 @@ def test_program():
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
     move_actuator(test_data[MEASUREDDATA], False)
-    time.sleep(2)
     sendmsg(CONNOMRON, MEASURE)
     test_data = receive_data(CONNOMRON)
     print(test_data[MEASUREDDATA])
-    move_actuator(test_data[MEASUREDDATA], False)
-    time.sleep(2)
-    sendmsg(CONNOMRON, MEASURE)
-    test_data = receive_data(CONNOMRON)
-    print(test_data[MEASUREDDATA])
-    move_actuator(test_data[MEASUREDDATA], False)
-    time.sleep(2)
-    sendmsg(CONNOMRON, MEASURE)
-    test_data = receive_data(CONNOMRON)
-    print(test_data[MEASUREDDATA])
-    move_actuator(test_data[MEASUREDDATA], False)
-    time.sleep(2)
-    sendmsg(CONNOMRON, MEASURE)
-    test_data = receive_data(CONNOMRON)
-    print(test_data[MEASUREDDATA])
-    #actuators_2neutral()
-
-'''def test_program(step_amount):
-    time.sleep(1)
-    write_to_arduino("start")
-    write_to_arduino(-step_amount)
-    #write_to_arduino(-step_amount)
-    #write_to_arduino(step_amount)
-    write_to_arduino("end")
-    time.sleep(1)
-    actuators_2neutral()
-
-    sendmsg(CONNOMRON, MEASURE)
-    test_data = receive_data(CONNOMRON)
-    print(test_data[MEASUREDDATA])
-
-    move_actuator(test_data[MEASUREDDATA], True)
-    #move_actuator(['200.00', '560.00', '-150.00', '180.00'])
-    time.sleep(2)
-    sendmsg(CONNOMRON, MEASURE)
-    test_data = receive_data(CONNOMRON)
-    print(test_data[MEASUREDDATA])
-    move_actuator(test_data[MEASUREDDATA], False)
-    time.sleep(2)
-    sendmsg(CONNOMRON, MEASURE)
-    test_data = receive_data(CONNOMRON)
-    print(test_data[MEASUREDDATA])
-    actuators_2neutral()
-    sendmsg(CONNOMRON, MEASURE)
-    print(receive_data(CONNOMRON)[MEASUREDDATA])'''
 
 if __name__ == '__main__':
     #GPIO_init()
@@ -278,16 +177,6 @@ if __name__ == '__main__':
     #status = 'plate arrived'
     try:
         test_data = receive_data(CONNOMRON)
-        '''rotate(['46', '-76', '-49', '99'])
-        step_amount = 16
-        while step_amount <= 6000:
-            test_program(step_amount)
-            if step_amount < 50:
-                step_amount += 16
-            elif step_amount > 50 and step_amount < 300:
-                step_amount += 100
-            else:
-                step_amount += 1000'''
         while True:
             test_program()
             #handle_data(status)
