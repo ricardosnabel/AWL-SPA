@@ -54,10 +54,8 @@ def receive_data(sock):
             return fragments
 
 def write_to_arduino(data):
-    time.sleep(2)
     ARDUINO.write(str.encode(str(data)))
-    time.sleep(2)
-    read_arduino()
+    time.sleep(1)
 
 def read_arduino():
     while True:
@@ -88,22 +86,26 @@ def maxsteps_check(steps):
 
 def move_actuator(data):
     write_to_arduino("start")
-    if abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2])) > 5:
-        diff = abs(abs(float(data[YAXISCAM0])) - abs(float((data[YAXISCAM2]))))
-        relPos0 = (float(data[YAXISCAM0]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
-        relPos2 = (float(data[YAXISCAM2]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
-        print(data[YAXISCAM2])
-        data[YAXISCAM0] = float(data[YAXISCAM0]) - relPos0
-        data[YAXISCAM2] = float(data[YAXISCAM2]) - relPos2
-        print(data[YAXISCAM2])
-        stepsToTake = convert_pixels2steps(data)
-        write_to_arduino(stepsToTake[YAXISCAM0] / 2)
-        write_to_arduino(stepsToTake[YAXISCAM2] / 2)
+    YDiff = abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2]))
+    if float(data[YAXISCAM0]) > 2 or float(data[YAXISCAM2]) > 2:
+        if YDiff > 5:
+            diff = abs(abs(float(data[YAXISCAM0])) - abs(float((data[YAXISCAM2]))))
+            relPos0 = (float(data[YAXISCAM0]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
+            relPos2 = (float(data[YAXISCAM2]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
+            print(data[YAXISCAM2])
+            data[YAXISCAM0] = float(data[YAXISCAM0]) - relPos0
+            data[YAXISCAM2] = float(data[YAXISCAM2]) - relPos2
+            print(data[YAXISCAM2])
+            stepsToTake = convert_pixels2steps(data)
+            stepsToTake[YAXISCAM0] /= 2
+            stepsToTake[YAXISCAM2] /= 2
+        write_to_arduino(stepsToTake[YAXISCAM0])
+        write_to_arduino(stepsToTake[YAXISCAM2])
     else:
         stepsToTake = convert_pixels2steps(data)
         #print("Translation: ", stepsToTake)
-        write_to_arduino(stepsToTake[YAXISCAM0])
-        write_to_arduino(stepsToTake[YAXISCAM0])
+        write_to_arduino(0)
+        write_to_arduino(0)
         write_to_arduino(stepsToTake[XAXISCAM0])
     write_to_arduino("end")
 
@@ -171,12 +173,12 @@ def test_program():
 if __name__ == '__main__':
     #GPIO_init()
     conn_init()
-    #status = 'plate arrived'
+    status = 'plate arrived'
     try:
         test_data = receive_data(CONNOMRON)
         while True:
             test_program()
-            #handle_data(status)
+            handle_data(status)
             time.sleep(1)
             '''if runApp == True:
                 test_program()
