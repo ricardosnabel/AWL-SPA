@@ -118,13 +118,13 @@ def move_actuator(data, check, prevStepsTaken):
         data[YAXISCAM2] = float(data[YAXISCAM2]) - relPos2
         data[YAXISCAM0] = float(data[YAXISCAM0]) - relPos0
         stepsToTake = convert_um2steps(convert_pixels2um(data))
-        write_to_arduino(MAXSTEPS) if (stepsToTake[YAXISCAM0] / 2) + prevStepsTaken[0] > MAXSTEPS else write_to_arduino((stepsToTake[YAXISCAM0] / 2) + prevStepsTaken[0])
-        write_to_arduino(MAXSTEPS) if (stepsToTake[YAXISCAM2] / 2) + prevStepsTaken[0] > MAXSTEPS else write_to_arduino((stepsToTake[YAXISCAM2] / 2) + prevStepsTaken[1])
+        #write_to_arduino(MAXSTEPS) if (stepsToTake[YAXISCAM0] / 2) + prevStepsTaken[0] > MAXSTEPS else write_to_arduino((stepsToTake[YAXISCAM0] / 2) + prevStepsTaken[0])
+        #write_to_arduino(MAXSTEPS) if (stepsToTake[YAXISCAM2] / 2) + prevStepsTaken[0] > MAXSTEPS else write_to_arduino((stepsToTake[YAXISCAM2] / 2) + prevStepsTaken[1])
         #write_to_arduino(MAXSTEPS) if (stepsToTake[YAXISCAM0] / 2) + prevStepsTaken[0] > MAXSTEPS else write_to_arduino((stepsToTake[XAXISCAM0] / 2) + prevStepsTaken[2])
         #print("Translation: ", stepsToTake)
-        #write_to_arduino(stepsToTake[YAXISCAM0] / 2)
-        #write_to_arduino(stepsToTake[YAXISCAM2] / 2)
-        #write_to_arduino((stepsToTake[XAXISCAM0] / 2) + prevStepsTaken[2])
+        write_to_arduino(stepsToTake[YAXISCAM0] / 2)
+        write_to_arduino(stepsToTake[YAXISCAM2] / 2)
+        #write_to_arduino(stepsToTake[XAXISCAM0] / 2)
         prevStepsTaken = [(stepsToTake[YAXISCAM0] / 2), (stepsToTake[YAXISCAM2] / 2), 0]
     write_to_arduino("end")
     return prevStepsTaken

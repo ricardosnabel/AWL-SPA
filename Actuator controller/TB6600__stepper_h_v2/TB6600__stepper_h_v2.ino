@@ -68,14 +68,17 @@ void PulseSignal(int steps, int enaPin, int dirPin){
     stepperX1.moveTo(steps);
     stepperX1.runToPosition();
     stepperX1.stop();
+    stepperX1.setCurrentPosition(0);
   } else if (enaPin == enaPinY2){
     stepperX2.moveTo(steps);
     stepperX2.runToPosition();
     stepperX2.stop();
+    stepperX2.setCurrentPosition(0);
   } else if (enaPin == enaPinX){
     stepperY.moveTo(steps);
     stepperY.runToPosition();
     stepperY.stop();
+    stepperY.setCurrentPosition(0);
   }
   digitalWrite(enaPin, true);
 }
