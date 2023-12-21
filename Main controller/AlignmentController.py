@@ -54,8 +54,9 @@ def receive_data(sock):
             return fragments
 
 def write_to_arduino(data):
+    time.sleep(2)
     ARDUINO.write(str.encode(str(data)))
-    time.sleep(1)
+    time.sleep(2)
 
 def read_arduino():
     while True:
@@ -87,26 +88,32 @@ def maxsteps_check(steps):
 def move_actuator(data):
     write_to_arduino("start")
     YDiff = abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2]))
-    if float(data[YAXISCAM0]) > 2 or float(data[YAXISCAM2]) > 2:
+    if abs(float(data[YAXISCAM0])) > 2.0 or abs(float(data[YAXISCAM2])) > 2.0:
         if YDiff > 5:
             diff = abs(abs(float(data[YAXISCAM0])) - abs(float((data[YAXISCAM2]))))
             relPos0 = (float(data[YAXISCAM0]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
             relPos2 = (float(data[YAXISCAM2]) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2])))) * diff
             print(data[YAXISCAM2])
+            print(data[YAXISCAM0])
             data[YAXISCAM0] = float(data[YAXISCAM0]) - relPos0
             data[YAXISCAM2] = float(data[YAXISCAM2]) - relPos2
             print(data[YAXISCAM2])
+            print(data[YAXISCAM0])
             stepsToTake = convert_pixels2steps(data)
-            stepsToTake[YAXISCAM0] /= 2
-            stepsToTake[YAXISCAM2] /= 2
-        write_to_arduino(stepsToTake[YAXISCAM0])
-        write_to_arduino(stepsToTake[YAXISCAM2])
+            write_to_arduino(stepsToTake[YAXISCAM0] / 2)
+            write_to_arduino(stepsToTake[YAXISCAM2] / 2)
+            print("werkt1")
+        else:
+            write_to_arduino(stepsToTake[YAXISCAM0])
+            write_to_arduino(stepsToTake[YAXISCAM2])
+        print("Steps: ", stepsToTake)
     else:
         stepsToTake = convert_pixels2steps(data)
         #print("Translation: ", stepsToTake)
         write_to_arduino(0)
         write_to_arduino(0)
         write_to_arduino(stepsToTake[XAXISCAM0])
+        print("werkt3")
     write_to_arduino("end")
 
 def handle_greenbutton(channel):
@@ -150,7 +157,8 @@ def handle_data(status):
                 if data[1] == 'READY\r':
                     status = 'aligned'
                 else:
-                    move_actuator(data[MEASUREDDATA], False)
+                    time.sleep(2)
+                    move_actuator(data[MEASUREDDATA])
             case 'aligned':
                 sendmsg(CONNEXTERN, 'OK')
                 status = 'wait for external module'
@@ -176,11 +184,12 @@ if __name__ == '__main__':
     status = 'plate arrived'
     try:
         test_data = receive_data(CONNOMRON)
-        while True:
+        handle_data(status)
+        '''while True:
             test_program()
             handle_data(status)
             time.sleep(1)
-            '''if runApp == True:
+            if runApp == True:
                 test_program()
             elif runApp == False:
                 print("Program is off.")'''
