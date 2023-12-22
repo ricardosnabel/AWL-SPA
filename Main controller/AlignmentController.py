@@ -62,7 +62,6 @@ def write_to_arduino(data):
 def read_arduino():
     while True:
         message = ARDUINO.readline()
-        re.sub("brn[(){}<>\']", "", str(message))
         print("Received message: ", message)
         return message
 
@@ -141,7 +140,7 @@ def handle_data(status):
                 if data[0][0] == 'OK\r':
                     status = 'unaligned'
             case 'unaligned':
-                if (read_arduino() == "end") or firstRun:
+                if (read_arduino() == b'end\r\n') or firstRun:
                     firstRun = False
                     sendmsg(CONNOMRON, MEASURE)
                     data = receive_data(CONNOMRON)
