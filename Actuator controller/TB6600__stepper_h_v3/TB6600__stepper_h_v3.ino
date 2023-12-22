@@ -29,21 +29,21 @@ void vTaskWriteSerial(void *pvParameters);
 void vTaskSignalMotor(void *pvParameters);
 void step_direction(int steps, int dirPin);
 
-// Global variables
-bool done;
-AccelStepper stepperX1(1, pulPinY1, dirPinY1);
-AccelStepper stepperX2(1, pulPinY2, dirPinY2);
-AccelStepper stepperY(1, pulPinX, dirPinX);
-
 typedef struct{
   uint8_t motor;
   uint16_t steps;
-} queue_data
+} queue_data;
 
 // FreeRTOS Handles
 QueueHandle_t xQueueSteps;
 SemaphoreHandle_t xSemSerial;
 SemaphoreHandle_t xSemSetDone;
+
+// Global variables
+bool done;
+AccelStepper stepperY1(1, pulPinY1, dirPinY1);
+AccelStepper stepperY2(1, pulPinY2, dirPinY2);
+AccelStepper stepperX(1, pulPinX, dirPinX);
 
 /* 
 *  To do:
@@ -58,8 +58,8 @@ void setup() {
   xTaskCreate(vTaskSignalMotor, "Signal motor", 100, NULL, tskIDLE_PRIORITY, NULL);
 
   xQueueSteps = xQueueCreate(NO_OF_ITEMS, sizeof(queue_data));
-  xSemSerial = xSemaphoreCreateBinary;
-  xSemSetDone = xSemaphoreCreateBinary;
+  xSemSerial = xSemaphoreCreateBinary();
+  xSemSetDone = xSemaphoreCreateBinary();
 
   stepper_innit();
   motor_innit();
@@ -102,7 +102,7 @@ void vTaskReadSerial(void *pvParameters){
       uint8_t readMotor = Serial.readStringUntil(';').toInt();
       uint16_t readSteps = Serial.readStringUntil('\r').toInt();
       xSemaphoreGive(xSemSerial);
-      if (readString && readSteps){
+      if (readMotor && readSteps){
         received_data.motor = readMotor;
         received_data.steps = readSteps;
         xQueueSendToBack(xQueueSteps, &received_data, portMAX_DELAY);
