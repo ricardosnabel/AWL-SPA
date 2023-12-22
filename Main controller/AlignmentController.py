@@ -1,4 +1,5 @@
 import socket
+import re
 import time
 import math
 import serial
@@ -55,11 +56,14 @@ def receive_data(sock):
 
 def write_to_arduino(data):
     message = str(data[0]) + ";" + str(data[1]) + ";" + str(data[2]) + ";"
+    print("Send Message: ", message)
     ARDUINO.write(str.encode(message))
 
 def read_arduino():
     while True:
-        message = ARDUINO.read_until('\r')
+        message = ARDUINO.readline()
+        re.sub("brn[(){}<>\']", "", str(message))
+        print("Received message: ", message)
         return message
 
 def convert_pixels2steps(data):
@@ -84,8 +88,10 @@ def maxsteps_check(steps):
 def move_actuator(data):
     YDiff = abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2]))
     if abs(float(data[YAXISCAM0])) > 5.0 or abs(float(data[YAXISCAM2])) > 5.0:
+        print("y movement")
         stepsToTake = convert_pixels2steps(data)
         if YDiff > 5:
+            print("if ydiff")
             data[YAXISCAM0] = float(data[YAXISCAM0]) * (abs(float(data[YAXISCAM0])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             data[YAXISCAM2] = float(data[YAXISCAM2]) * (abs(float(data[YAXISCAM2])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             stepsToTake = convert_pixels2steps(data)
@@ -94,6 +100,7 @@ def move_actuator(data):
         write_to_arduino([stepsToTake[YAXISCAM0], stepsToTake[YAXISCAM2], 0])
         print("Steps: ", stepsToTake)
     else:
+        print("x movement")
         stepsToTake = convert_pixels2steps(data)
         write_to_arduino([0, 0, stepsToTake[XAXISCAM0]])
 
@@ -118,12 +125,14 @@ def handle_redbutton(channel):
     GPIO.add_event_detect(REDBUTTON,GPIO.RISING,callback=handle_redbutton)
 
 def handle_data(status):
+    firstRun = True
     while True:
         match status:
             case 'waiting for plate':
                 #data = receive_data(CONNEXTERN)
                 #if data == 'OK':
                 if runApp:
+                    firstRun = True
                     print("waiting for plate")
                     status = 'plate arrived'
             case 'plate arrived':
@@ -132,7 +141,8 @@ def handle_data(status):
                 if data[0][0] == 'OK\r':
                     status = 'unaligned'
             case 'unaligned':
-                if (read_arduino() == "end"):
+                if (read_arduino() == "end") or firstRun:
+                    firstRun = False
                     sendmsg(CONNOMRON, MEASURE)
                     data = receive_data(CONNOMRON)
                     print(data)
