@@ -28,9 +28,8 @@ void setup() {
   pinMode(enaPinX, OUTPUT);
 
   stepper_innit();
-
-  digitalWrite(enaPinY2, true);
   digitalWrite(enaPinY1, true);
+  digitalWrite(enaPinY2, true);
   digitalWrite(enaPinX, true);
 }
 
@@ -38,38 +37,44 @@ void stepper_innit(){
   stepperY1.setMaxSpeed(3200);
   stepperY1.setAcceleration(400);
   stepperY1.setSpeed(3200);
-  stepperY1.setEnablePin(enaPinY1);
   stepperY2.setMaxSpeed(3200);
   stepperY2.setAcceleration(400);
   stepperY2.setSpeed(3200);
-  stepperY2.setEnablePin(enaPinY2);
   stepperX.setMaxSpeed(3200);
   stepperX.setAcceleration(400);
   stepperX.setSpeed(3200);
-  stepperX.setEnablePin(enaPinX);
 }
 
 void loop() {
-  uint8_t readMotorY1;
-  uint8_t readMotorY2;
-  uint8_t readMotorX;
+  float readMotorY1;
+  float readMotorY2;
+  float readMotorX;
   uint16_t readSteps;
   uint8_t enaPin = 0;
   uint8_t dirPin = 0;
 
   if (Serial.available() > 0){
-    readMotorY1 = Serial.readStringUntil(';').toInt();
-    readMotorY2 = Serial.readStringUntil(';').toInt();
-    readMotorX  = Serial.readStringUntil(';').toInt();
+    readMotorY1 = Serial.readStringUntil(';').toFloat();
+    readMotorY2 = Serial.readStringUntil(';').toFloat();
+    readMotorX  = Serial.readStringUntil(';').toFloat();
+    Serial.println(readMotorY1);
+    Serial.println(readMotorY2);
+    Serial.println(readMotorX);
 
     stepperY1.moveTo(readMotorY1);
     stepperY2.moveTo(readMotorY2);
     stepperX.moveTo(readMotorX);
 
     while((abs(stepperY1.distanceToGo()) != 0) || (abs(stepperY2.distanceToGo()) != 0) || (abs(stepperX.distanceToGo()) != 0)){
+      digitalWrite(enaPinY1, false);
+      digitalWrite(enaPinY2, false);
+      digitalWrite(enaPinX, false);
       stepperY1.run();
       stepperY2.run();
       stepperX.run();
+      digitalWrite(enaPinY1, true);
+      digitalWrite(enaPinY2, true);
+      digitalWrite(enaPinX, true);
     }
 
     if ((abs(stepperY1.distanceToGo()) == 0) && (abs(stepperY2.distanceToGo()) == 0) && (abs(stepperX.distanceToGo()) == 0)){
