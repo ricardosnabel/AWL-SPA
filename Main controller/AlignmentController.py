@@ -19,7 +19,7 @@ REDBUTTON = 16
 GREENBUTTON = 15
 CONNOMRON = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 CONNEXTERN = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ARDUINO = serial.Serial(port='/dev/ttyUSB0', baudrate=2000000, timeout=.1)
+ARDUINO = serial.Serial(port='/dev/ttyUSB0', baudrate=115200, timeout=2)
 OMRONCONTROLLER = ['10.5.5.100', 9876]
 EXTERNCONTROLLER = ['127.0.0.1', 0]
 runApp = False
@@ -54,17 +54,13 @@ def receive_data(sock):
             return fragments
 
 def write_to_arduino(data):
-    time.sleep(2)
-    ARDUINO.write(str.encode(str(data)))
-    time.sleep(5)
+    message = str(data[0]) + ";" + str(data[1]) + ";" + str(data[2]) + ";"
+    ARDUINO.write(str.encode(message))
 
 def read_arduino():
     while True:
-        time.sleep(.5)
-        recv = ARDUINO.readline()
-        if not recv:
-            break
-        print(recv)
+        message = ARDUINO.read_until('\r')
+        return message
 
 def convert_pixels2steps(data):
     if isinstance(data, float):
@@ -86,27 +82,20 @@ def maxsteps_check(steps):
     return steps
 
 def move_actuator(data):
-    write_to_arduino("start")
     YDiff = abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2]))
     if abs(float(data[YAXISCAM0])) > 5.0 or abs(float(data[YAXISCAM2])) > 5.0:
         stepsToTake = convert_pixels2steps(data)
         if YDiff > 5:
             data[YAXISCAM0] = float(data[YAXISCAM0]) * (abs(float(data[YAXISCAM0])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             data[YAXISCAM2] = float(data[YAXISCAM2]) * (abs(float(data[YAXISCAM2])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
-            print(data[YAXISCAM2])
-            print(data[YAXISCAM0])
             stepsToTake = convert_pixels2steps(data)
             #stepsToTake[YAXISCAM0] /= 2
             #stepsToTake[YAXISCAM2] /= 2
-        write_to_arduino(stepsToTake[YAXISCAM0])
-        write_to_arduino(stepsToTake[YAXISCAM2])
+        write_to_arduino([stepsToTake[YAXISCAM0], stepsToTake[YAXISCAM2], 0])
         print("Steps: ", stepsToTake)
     else:
         stepsToTake = convert_pixels2steps(data)
-        write_to_arduino(0)
-        write_to_arduino(0)
-        write_to_arduino(stepsToTake[XAXISCAM0])
-    write_to_arduino("end")
+        write_to_arduino([0, 0, stepsToTake[XAXISCAM0]])
 
 def handle_greenbutton(channel):
     global runApp
@@ -143,14 +132,14 @@ def handle_data(status):
                 if data[0][0] == 'OK\r':
                     status = 'unaligned'
             case 'unaligned':
-                sendmsg(CONNOMRON, MEASURE)
-                data = receive_data(CONNOMRON)
-                print(data[MEASUREDDATA])
-                if data[1][0] == 'READY\r':
-                    status = 'aligned'
-                else:
-                    #time.sleep(5)
-                    move_actuator(data[MEASUREDDATA])
+                if (read_arduino() == "end"):
+                    sendmsg(CONNOMRON, MEASURE)
+                    data = receive_data(CONNOMRON)
+                    print(data)
+                    if data[1][0] == 'READY\r':
+                        status = 'aligned'
+                    else:
+                        move_actuator(data[MEASUREDDATA])
             case 'aligned':
                 sendmsg(CONNEXTERN, 'OK')
                 status = 'wait for external module'
@@ -165,7 +154,7 @@ if __name__ == '__main__':
     conn_init()
     status = 'plate arrived'
     try:
-        test_data = receive_data(CONNOMRON)
+        #test_data = receive_data(CONNOMRON)
         handle_data(status)
         '''while True:
             test_program()

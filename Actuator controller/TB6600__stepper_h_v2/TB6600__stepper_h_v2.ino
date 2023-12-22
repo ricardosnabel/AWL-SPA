@@ -9,17 +9,14 @@
 #define pulPinX       4
 #define dirPinX       3
 #define enaPinX       2
-#define startPosition 0
 
-byte index, status;
-int *cam;
-
-AccelStepper stepperX1(1, pulPinY1, dirPinY1);
-AccelStepper stepperX2(1, pulPinY2, dirPinY2);
-AccelStepper stepperY(1, pulPinX, dirPinX);
+AccelStepper stepperY1(1, pulPinY1, dirPinY1);
+AccelStepper stepperY2(1, pulPinY2, dirPinY2);
+AccelStepper stepperX(1, pulPinX, dirPinX);
 
 void setup() {
-  Serial.begin(2000000);
+  Serial.setTimeout(2);
+  Serial.begin(115200);
   pinMode(dirPinY1, OUTPUT);
   pinMode(pulPinY1, OUTPUT);
   pinMode(enaPinY1, OUTPUT);
@@ -35,112 +32,49 @@ void setup() {
   digitalWrite(enaPinY2, true);
   digitalWrite(enaPinY1, true);
   digitalWrite(enaPinX, true);
-
-  index = 0;
-  status = 0;
-  cam = 0;
 }
 
 void stepper_innit(){
-  stepperX1.setMaxSpeed(3200);
-  stepperX1.setAcceleration(400);
-  stepperX1.setSpeed(3200);
-  stepperX2.setMaxSpeed(3200);
-  stepperX2.setAcceleration(400);
-  stepperX2.setSpeed(3200);
-  stepperY.setMaxSpeed(3200);
-  stepperY.setAcceleration(400);
-  stepperY.setSpeed(3200);
-}
-
-void step_direction(int steps, int dirPin){
-    if (steps > 0)
-      digitalWrite(dirPin, true);
-    else
-      digitalWrite(dirPin, false);
-}
-
-void PulseSignal(int steps, int enaPin, int dirPin){
-  print_serial("Steps: ", steps);
-  step_direction(steps, dirPin);
-  digitalWrite(enaPin, false);
-  if (enaPin == enaPinY1){
-    stepperX1.moveTo(steps);
-    stepperX1.runToPosition();
-    stepperX1.stop();
-    stepperX1.setCurrentPosition(0);
-  } else if (enaPin == enaPinY2){
-    stepperX2.moveTo(steps);
-    stepperX2.runToPosition();
-    stepperX2.stop();
-    stepperX2.setCurrentPosition(0);
-  } else if (enaPin == enaPinX){
-    stepperY.moveTo(steps);
-    stepperY.runToPosition();
-    stepperY.stop();
-    stepperY.setCurrentPosition(0);
-  }
-  digitalWrite(enaPin, true);
-}
-
-void print_serial(int data){
-  Serial.println(data);
-}
-
-void print_serial(String data){
-  Serial.println(data);
-}
-
-void print_serial(String txtData, int numData){
-  Serial.print(txtData);
-  Serial.println(numData);
+  stepperY1.setMaxSpeed(3200);
+  stepperY1.setAcceleration(400);
+  stepperY1.setSpeed(3200);
+  stepperY1.setEnablePin(enaPinY1);
+  stepperY2.setMaxSpeed(3200);
+  stepperY2.setAcceleration(400);
+  stepperY2.setSpeed(3200);
+  stepperY2.setEnablePin(enaPinY2);
+  stepperX.setMaxSpeed(3200);
+  stepperX.setAcceleration(400);
+  stepperX.setSpeed(3200);
+  stepperX.setEnablePin(enaPinX);
 }
 
 void loop() {
-  String readSerial;
-  int enaPin = 0;
-  int dirPin = 0;
-  switch (status){
-    case 0:
-      readSerial = Serial.readString();
-      if (readSerial == "start"){
-        status = 1;
-      }
-      break;
-    case 1:
-      if (Serial.available() > 0){
-        readSerial = Serial.readString();
-        if (readSerial == "end"){
-          index = 0;
-          cam = 0;
-          status = 0;
-        }
-        else {
-          index++;
-          cam[index] = readSerial.toInt();
-          status = 2;
-        }
-      }
-      break;
-    case 2:
-      if (index == 1){
-        enaPin = enaPinY1;
-        dirPin = dirPinY1;
-      }
-      else if (index == 2){
-        enaPin = enaPinY2;
-        dirPin = dirPinY2;
-      }
-      else if (index == 3){
-        enaPin = enaPinX;
-        dirPin = dirPinX;
-      } else {
-        status = 1;
-        break;
-      }
-      print_serial("enaPin: ", enaPin);
-      PulseSignal(cam[index], enaPin, dirPin);
-      status = 1;
-      break;
+  uint8_t readMotorY1;
+  uint8_t readMotorY2;
+  uint8_t readMotorX;
+  uint16_t readSteps;
+  uint8_t enaPin = 0;
+  uint8_t dirPin = 0;
+
+  if (Serial.available() > 0){
+    readMotorY1 = Serial.readStringUntil(';').toInt();
+    readMotorY2 = Serial.readStringUntil(';').toInt();
+    readMotorX  = Serial.readStringUntil(';').toInt();
+
+    stepperY1.moveTo(readMotorY1);
+    stepperY2.moveTo(readMotorY2);
+    stepperX.moveTo(readMotorX);
+
+    while((abs(stepperY1.distanceToGo()) != 0) || (abs(stepperY2.distanceToGo()) != 0) || (abs(stepperX.distanceToGo()) != 0)){
+      stepperY1.run();
+      stepperY2.run();
+      stepperX.run();
+    }
+
+    if ((abs(stepperY1.distanceToGo()) == 0) && (abs(stepperY2.distanceToGo()) == 0) && (abs(stepperX.distanceToGo()) == 0)){
+      Serial.println("end");
+    }
+
   }
 }
