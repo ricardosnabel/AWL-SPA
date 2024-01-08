@@ -74,7 +74,7 @@ void loop() {
 
     steppers.runSpeedToPosition();
 
-    delay(1000);
+    delay(5000);
 
     digitalWrite(enaPinY1, true);
     digitalWrite(enaPinY2, true);
