@@ -43,7 +43,7 @@ void stepper_innit(){
   stepperY1.setMaxSpeed(3200);
   stepperY2.setMaxSpeed(3200);
   stepperX.setMaxSpeed(3200);
-  
+
   steppers.addStepper(stepperY1);
   steppers.addStepper(stepperY2);
   steppers.addStepper(stepperX);
@@ -62,7 +62,9 @@ void loop() {
     positions[Y2] = Serial.readStringUntil(';').toFloat();
     positions[X]  = Serial.readStringUntil(';').toFloat();
 
-    Serial.println(positions);
+    Serial.println(positions[0]);
+    Serial.println(positions[1]);
+    Serial.println(positions[2]);
 
     steppers.moveTo(positions);
     steppers.runSpeedToPosition();

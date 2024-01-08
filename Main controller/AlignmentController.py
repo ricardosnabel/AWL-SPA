@@ -168,8 +168,6 @@ def handle_data(status):
                     status = 'unaligned'
             case 'unaligned':
                 reading = read_arduino()
-                print(reading)
-                print(firstRun)
                 if (reading == b'end\r\n') or firstRun:
                     reading = ""
                     firstRun = False
