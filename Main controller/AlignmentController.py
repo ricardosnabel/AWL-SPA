@@ -167,7 +167,11 @@ def handle_data(status):
                 if data[0][0] == 'OK\r':
                     status = 'unaligned'
             case 'unaligned':
-                if (read_arduino() == b'end\r\n') or firstRun:
+                reading = read_arduino()
+                print(reading)
+                print(firstRun)
+                if (reading == b'end\r\n') or firstRun:
+                    reading = ""
                     firstRun = False
                     sendmsg(CONNOMRON, MEASURE)
                     data = receive_data(CONNOMRON)

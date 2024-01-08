@@ -56,7 +56,7 @@ void loop() {
     readMotorY1 = Serial.readStringUntil(';').toFloat();
     readMotorY2 = Serial.readStringUntil(';').toFloat();
     readMotorX  = Serial.readStringUntil(';').toFloat();
-    
+
     Serial.println(readMotorY1);
     Serial.println(readMotorY2);
     Serial.println(readMotorX);
@@ -65,9 +65,7 @@ void loop() {
     stepperY2.moveTo(readMotorY2);
     stepperX.moveTo(readMotorX);
 
-    Serial.println(stepperY1.distanceToGo());
-    Serial.println(stepperY2.distanceToGo());
-    Serial.println(stepperX.distanceToGo());
+
 
     while((abs(stepperY1.distanceToGo()) != 0) || (abs(stepperY2.distanceToGo()) != 0) || (abs(stepperX.distanceToGo()) != 0)){
       digitalWrite(enaPinY1, false);
@@ -81,6 +79,9 @@ void loop() {
       digitalWrite(enaPinY1, true);
       digitalWrite(enaPinY2, true);
       digitalWrite(enaPinX, true);
+      Serial.println(stepperY1.distanceToGo());
+      Serial.println(stepperY2.distanceToGo());
+      Serial.println(stepperX.distanceToGo());
     }
 
     if ((abs(stepperY1.distanceToGo()) == 0) && (abs(stepperY2.distanceToGo()) == 0) && (abs(stepperX.distanceToGo()) == 0)){
