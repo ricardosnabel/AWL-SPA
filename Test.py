@@ -1,4 +1,5 @@
 import math
+import time
 
 MEASUREDDATA = 1
 XAXISCAM0 = 0
@@ -7,14 +8,15 @@ XAXISCAM2 = 2
 YAXISCAM2 = 3
 MEASURE = 'M'
 LAYOUT = 'DLN 0 1'
-DISTANCEX = 262500 / 2
-DISTANCEY = 140000 / 2
-XMOTORDISTANCE = 92000 # distance between two translation points
-DZEROVALUE = -40588.23529411765
 PIXELSIZE = 9.922
 STEPSIZE = .625
 MAXSTEPS = 7500 # test maximum
-
+OMRONCONTROLLER = ['10.5.5.100', 9876]
+EXTERNCONTROLLER = ['127.0.0.1', 0]
+runApp = False
+countSteps = [0, 0, 0] # [Y1, Y2, X]
+test_data = ['OK\r', ['-240.5077', '356.2894', '160.6148', '169.1143\r']]
+'''
 def convert_um2steps(data):
     if isinstance(data, float):
         stepsToTake = (data / STEPSIZE) #- -64941.17647058824
@@ -101,7 +103,7 @@ def move_actuator(data):
     print()
 
 # current calculations on the rotations.
-'''def rotate(data):
+def rotate(data):
     epsilon = abs(convert_pixels2um(float(data[XAXISCAM0])) - convert_pixels2um(float(data[XAXISCAM2])))
     n = ((4 / (XMOTORDISTANCE * XMOTORDISTANCE)) * ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
     m = (((DISTANCEY*2) * epsilon) / XMOTORDISTANCE)
@@ -117,7 +119,7 @@ def move_actuator(data):
     print("P: ", p)
     print("Calc: ", calc)
     print("Steps: ", stepsToTake)
-    return stepsToTake'''
+    return stepsToTake
 
 if __name__ == '__main__':
     # originele dataset = ['-265.8202', '478.1003', '149.0438', '-339.4766']
@@ -128,4 +130,120 @@ if __name__ == '__main__':
     
     data = ['-24.5077', '-16.1143', '16.6148', '-356.2894\r']
     print("Test 2: ")
-    move_actuator(data)
+    move_actuator(data)'''
+
+def convert_pixels2steps(data):
+    if isinstance(data, float):
+        distInUm = PIXELSIZE * data
+        stepsToTake = maxsteps_check(distInUm / STEPSIZE)
+    else:
+        stepsToTake = []
+        for i in data:
+            distInUm = PIXELSIZE * float(i)
+            stepsToTake.append(maxsteps_check(distInUm / STEPSIZE))
+    return stepsToTake
+
+def maxsteps_check(steps):
+    if steps > MAXSTEPS:
+        steps = MAXSTEPS
+    elif steps < -MAXSTEPS:
+        steps = -MAXSTEPS
+    return steps
+
+def move_actuator(data):
+    YDiff = abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2]))
+    if abs(float(data[YAXISCAM0])) > 5.0 or abs(float(data[YAXISCAM2])) > 5.0:
+        print("y movement")
+        stepsToTake = convert_pixels2steps(data)
+        if YDiff > 5:
+            data[YAXISCAM0] = float(data[YAXISCAM0]) * (abs(float(data[YAXISCAM0])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
+            data[YAXISCAM2] = float(data[YAXISCAM2]) * (abs(float(data[YAXISCAM2])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
+            stepsToTake = convert_pixels2steps(data)
+            #stepsToTake[YAXISCAM0] /= 2
+            #stepsToTake[YAXISCAM2] /= 2
+        write = handle_countSteps([stepsToTake[YAXISCAM0], stepsToTake[YAXISCAM2], 0], False, False)
+        test_data[MEASUREDDATA][YAXISCAM0] *= 0.8
+        test_data[MEASUREDDATA][YAXISCAM2] *= 0.8
+        print(write)
+    else:
+        print("x movement")
+        stepsToTake = convert_pixels2steps(data)
+        write = handle_countSteps([0, 0, stepsToTake[XAXISCAM0]], False, False)
+        test_data[MEASUREDDATA][XAXISCAM0] *= 0.8
+        test_data[MEASUREDDATA][XAXISCAM2] *= 0.8
+        print(write)
+
+def to_neutral(steps):
+    for i in range(len(steps)):
+        if steps[i] >= 0:
+            steps[i] = -steps[i]
+        else:
+            steps[i] = abs(steps[i])
+    print("Steps to neutral: ", steps)
+    return steps
+
+def handle_countSteps(steps, clear, getcount):
+    global countSteps
+    if clear:
+        countSteps = [0, 0, 0]
+        print("Clear countSteps: ", countSteps)
+        return 0
+    if getcount:
+        print("Current countSteps: ", countSteps)
+        return countSteps
+    else:
+        for i in range(len(steps)):
+            if abs(countSteps[i] + steps[i]) >= MAXSTEPS:
+                steps[i] = 0
+            else:
+                countSteps[i] += steps[i]
+        print("Max step check: ", steps)
+        print("Countstep check: ", countSteps)
+        return steps
+
+def handle_test():
+    check_pos = 0
+    for i in range(len(test_data[MEASUREDDATA])):
+        test_data[MEASUREDDATA][i] = float(test_data[MEASUREDDATA][i])
+        if test_data[MEASUREDDATA][i] < 5.0:
+            check_pos += 1
+            print(check_pos)
+    if check_pos >= 4:
+        print(test_data)
+        test_data[MEASUREDDATA] = ['READY\r']
+
+def handle_data(status):
+    while True:
+        match status:
+            case 'waiting for plate':
+                handle_countSteps(0, True, False)
+                print()
+                time.sleep(2)
+                status = 'plate arrived'
+            case 'plate arrived':
+                status = 'unaligned'
+            case 'unaligned':
+                    handle_test()
+                    time.sleep(.5)
+                    data = test_data
+                    print(data)
+                    if data[MEASUREDDATA][0] == 'READY\r':
+                        status = 'aligned'
+                    else:
+                        move_actuator(data[MEASUREDDATA])
+                        print()
+            case 'aligned':
+                time.sleep(2)
+                status = 'wait for external module'
+            case 'wait for external module':
+                time.sleep(2)
+                status = 'return to neutral'
+            case 'return to neutral':
+                to_neutral(handle_countSteps(0, False, True))
+                print()
+                status = 'waiting for plate'
+
+if __name__ == '__main__':
+    status = 'waiting for plate'
+    handle_data(status)
+

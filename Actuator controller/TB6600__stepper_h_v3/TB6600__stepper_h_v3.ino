@@ -27,6 +27,7 @@ void stepper_innit();
 void vTaskReadSerial(void *pvParameters);
 void vTaskWriteSerial(void *pvParameters);
 void vTaskSignalMotor(void *pvParameters);
+void vTaskCalibrate(void *pvParameters);
 void step_direction(int steps, int dirPin);
 
 typedef struct{
@@ -56,6 +57,7 @@ void setup() {
   xTaskCreate(vTaskReadSerial, "Read Serial", 100, NULL, tskIDLE_PRIORITY, NULL);
   xTaskCreate(vTaskWriteSerial, "Write Serial", 100, NULL, tskIDLE_PRIORITY, NULL);
   xTaskCreate(vTaskSignalMotor, "Signal motor", 100, NULL, tskIDLE_PRIORITY, NULL);
+  xTaskCreate(vTaskCalibrate, "Calibrate system", 100, NULL, tskIDLE_PRIORITY, NULL);
 
   xQueueSteps = xQueueCreate(NO_OF_ITEMS, sizeof(queue_data));
   xSemSerial = xSemaphoreCreateBinary();
@@ -158,6 +160,10 @@ void vTaskSignalMotor(void *pvParameters){
     done = true;
     xSemaphoreGive(xSemSetDone);
   }
+}
+
+void vTaskCalibrate(void *pvParameters){
+
 }
 
 void step_direction(int steps, int dirPin){

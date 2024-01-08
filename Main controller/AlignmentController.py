@@ -24,6 +24,7 @@ ARDUINO = serial.Serial(port='/dev/ttyUSB0', baudrate=115200, timeout=2)
 OMRONCONTROLLER = ['10.5.5.100', 9876]
 EXTERNCONTROLLER = ['127.0.0.1', 0]
 runApp = False
+countSteps = [0, 0, 0] # [Y1, Y2, X]
 
 def conn_init():
     CONNOMRON.settimeout(1)
@@ -96,12 +97,37 @@ def move_actuator(data):
             stepsToTake = convert_pixels2steps(data)
             #stepsToTake[YAXISCAM0] /= 2
             #stepsToTake[YAXISCAM2] /= 2
-        write_to_arduino([stepsToTake[YAXISCAM0], stepsToTake[YAXISCAM2], 0])
+        write = handle_countSteps([stepsToTake[YAXISCAM0], stepsToTake[YAXISCAM2], 0], False, False)
+        write_to_arduino(write)
         print("Steps: ", stepsToTake)
     else:
         print("x movement")
         stepsToTake = convert_pixels2steps(data)
-        write_to_arduino([0, 0, stepsToTake[XAXISCAM0]])
+        write = handle_countSteps([0, 0, stepsToTake[XAXISCAM0]], False, False)
+        write_to_arduino(write)
+
+def to_neutral(steps):
+    for i in range(len(steps)):
+        if steps[i] >= 0:
+            steps[i] = -steps[i]
+        else:
+            steps[i] = abs(steps[i])
+    return steps
+
+def handle_countSteps(steps, clear, getcount):
+    global countSteps
+    if clear:
+        countSteps = [0, 0, 0]
+        return 0
+    if getcount:
+        return countSteps
+    else:
+        for i in range(len(steps)):
+            if abs(countSteps[i] + steps[i]) >= MAXSTEPS:
+                steps[i] = 0
+            else:
+                countSteps[i] += steps[i]
+        return steps
 
 def handle_greenbutton(channel):
     global runApp
@@ -128,6 +154,7 @@ def handle_data(status):
     while True:
         match status:
             case 'waiting for plate':
+                handle_countSteps(0, True, False)
                 #data = receive_data(CONNEXTERN)
                 #if data == 'OK':
                 if runApp:
@@ -145,7 +172,7 @@ def handle_data(status):
                     sendmsg(CONNOMRON, MEASURE)
                     data = receive_data(CONNOMRON)
                     print(data)
-                    if data[1][0] == 'READY\r':
+                    if data[MEASUREDDATA][0] == 'READY\r':
                         status = 'aligned'
                     else:
                         move_actuator(data[MEASUREDDATA])
@@ -156,6 +183,7 @@ def handle_data(status):
                 if receive_data(CONNEXTERN) == 'OK\r':
                     status = 'return to neutral'
             case 'return to neutral':
+                write_to_arduino(to_neutral(handle_countSteps(0, False, True)))
                 status = 'waiting for plate'
 
 if __name__ == '__main__':
