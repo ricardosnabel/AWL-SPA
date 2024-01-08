@@ -57,18 +57,28 @@ void loop() {
   uint8_t enaPin = 0;
   uint8_t dirPin = 0;
 
-  if (Serial.available() > 0){
+  if (Serial.available() >= 0){
     positions[Y1] = Serial.readStringUntil(';').toFloat();
     positions[Y2] = Serial.readStringUntil(';').toFloat();
     positions[X]  = Serial.readStringUntil(';').toFloat();
 
-    Serial.println(positions[0]);
-    Serial.println(positions[1]);
-    Serial.println(positions[2]);
+    Serial.println(positions[Y1]);
+    Serial.println(positions[Y2]);
+    Serial.println(positions[X]);
 
     steppers.moveTo(positions);
+
+    digitalWrite(enaPinY1, false);
+    digitalWrite(enaPinY2, false);
+    digitalWrite(enaPinX, false);
+
     steppers.runSpeedToPosition();
-    delay(500);
+
+    digitalWrite(enaPinY1, true);
+    digitalWrite(enaPinY2, true);
+    digitalWrite(enaPinX, true);
+
+    delay(1000);
 
     Serial.println("end");
 
