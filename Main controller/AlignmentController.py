@@ -95,8 +95,8 @@ def move_actuator(data):
             data[YAXISCAM0] = float(data[YAXISCAM0]) * (abs(float(data[YAXISCAM0])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             data[YAXISCAM2] = float(data[YAXISCAM2]) * (abs(float(data[YAXISCAM2])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             stepsToTake = convert_pixels2steps(data)
-            #stepsToTake[YAXISCAM0] /= 2
-            #stepsToTake[YAXISCAM2] /= 2
+            stepsToTake[YAXISCAM0] /= 2
+            stepsToTake[YAXISCAM2] /= 2
         write = handle_countSteps([stepsToTake[YAXISCAM0], stepsToTake[YAXISCAM2], 0], False, False)
         write_to_arduino(write)
         print("Steps: ", stepsToTake)
