@@ -58,9 +58,9 @@ void loop() {
   uint8_t dirPin = 0;
 
   if (Serial.available() >= 0){
-    positions[Y1] = Serial.readStringUntil(';').toFloat();
-    positions[Y2] = Serial.readStringUntil(';').toFloat();
-    positions[X]  = Serial.readStringUntil(';').toFloat();
+    positions[Y1] = Serial.readStringUntil(';').toInt();
+    positions[Y2] = Serial.readStringUntil(';').toInt();
+    positions[X]  = Serial.readStringUntil(';').toInt();
 
     Serial.println(positions[Y1]);
     Serial.println(positions[Y2]);
@@ -74,11 +74,11 @@ void loop() {
 
     steppers.runSpeedToPosition();
 
+    delay(1000);
+
     digitalWrite(enaPinY1, true);
     digitalWrite(enaPinY2, true);
     digitalWrite(enaPinX, true);
-
-    delay(1000);
 
     Serial.println("end");
 
