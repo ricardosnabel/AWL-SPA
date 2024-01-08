@@ -20,7 +20,7 @@ REDBUTTON = 16
 GREENBUTTON = 15
 CONNOMRON = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 CONNEXTERN = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ARDUINO = serial.Serial(port='/dev/ttyUSB0', baudrate=115200, timeout=2)
+ARDUINO = serial.Serial(port='/dev/ttyUSB0', baudrate=9600, timeout=2)
 OMRONCONTROLLER = ['10.5.5.100', 9876]
 EXTERNCONTROLLER = ['127.0.0.1', 0]
 runApp = False
