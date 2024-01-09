@@ -64,9 +64,12 @@ void loop() {
   float readMotorX = 0.0;
 
   if (Serial.available() >= 0){
-    positions[Y1] = step_direction(Serial.readStringUntil(';').toInt(), dirPinY1);
+    /*positions[Y1] = step_direction(Serial.readStringUntil(';').toInt(), dirPinY1);
     positions[Y2] = step_direction(Serial.readStringUntil(';').toInt(), dirPinY2);
-    positions[X]  = step_direction(Serial.readStringUntil(';').toInt(), dirPinX);
+    positions[X]  = step_direction(Serial.readStringUntil(';').toInt(), dirPinX);*/
+    positions[Y1] = Serial.readStringUntil(';').toInt();
+    positions[Y2] = Serial.readStringUntil(';').toInt();
+    positions[X]  = Serial.readStringUntil(';').toInt();
 
     //Serial.println(positions[Y1]);
     //Serial.println(positions[Y2]);
@@ -80,7 +83,7 @@ void loop() {
 
     steppers.runSpeedToPosition();
 
-    delay(1000);
+    delay(2000);
 
     digitalWrite(enaPinY1, true);
     digitalWrite(enaPinY2, true);
