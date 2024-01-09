@@ -174,11 +174,11 @@ def handle_data(status):
                     sendmsg(CONNOMRON, MEASURE)
                     data = receive_data(CONNOMRON)
                     print(data)
-                    time.sleep(5)
                     if data[MEASUREDDATA][0] == 'READY\r':
                         status = 'aligned'
                     else:
                         move_actuator(data[MEASUREDDATA])
+                        time.sleep(5)
             case 'aligned':
                 sendmsg(CONNEXTERN, 'OK')
                 status = 'wait for external module'

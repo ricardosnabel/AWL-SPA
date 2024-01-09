@@ -40,20 +40,21 @@ void setup() {
 }
 
 void stepper_innit(){
-  stepperY1.setMaxSpeed(3200);
-  stepperY2.setMaxSpeed(3200);
-  stepperX.setMaxSpeed(3200);
+  stepperY1.setMaxSpeed(800);
+  stepperY2.setMaxSpeed(800);
+  stepperX.setMaxSpeed(800);
 
   steppers.addStepper(stepperY1);
   steppers.addStepper(stepperY2);
   steppers.addStepper(stepperX);
 }
 
-void step_direction(long steps, uint8_t dirPin){
-  if (steps > 0)
+long step_direction(long steps, uint8_t dirPin){
+  if (steps < 0)
     digitalWrite(dirPin, true);
   else
     digitalWrite(dirPin, false);
+  return abs(steps);
 }
 
 void loop() {
@@ -63,13 +64,9 @@ void loop() {
   float readMotorX = 0.0;
 
   if (Serial.available() >= 0){
-    positions[Y1] = Serial.readStringUntil(';').toInt();
-    positions[Y2] = Serial.readStringUntil(';').toInt();
-    positions[X]  = Serial.readStringUntil(';').toInt();
-
-    step_direction(positions[Y1], dirPinY1);
-    step_direction(positions[Y2], dirPinY2);
-    step_direction(positions[X], dirPinX);
+    positions[Y1] = step_direction(Serial.readStringUntil(';').toInt(), dirPinY1);
+    positions[Y2] = step_direction(Serial.readStringUntil(';').toInt(), dirPinY2);
+    positions[X]  = step_direction(Serial.readStringUntil(';').toInt(), dirPinX);
 
     //Serial.println(positions[Y1]);
     //Serial.println(positions[Y2]);
