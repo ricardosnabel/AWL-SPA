@@ -131,7 +131,7 @@ def movement(data):
              ((datainUm[XAXISCAM2]) * MATRIX[2][0]) + ((datainUm[YAXISCAM2]) * MATRIX[2][1]) + (datainUm[YAXISCAM0] * MATRIX[2][2])] # Delta
     delta[2] = delta[0] + (delta[2] * (DISTANCES[2] - DISTANCES[0]))
     stepsToTake = convert_um2steps(delta)
-    write_to_arduino([stepsToTake[1], stepsToTake[2], stepsToTake[0]])
+    write_to_arduino([stepsToTake[2], stepsToTake[1], stepsToTake[0]])
 
 def to_neutral(steps):
     for i in range(len(steps)):
