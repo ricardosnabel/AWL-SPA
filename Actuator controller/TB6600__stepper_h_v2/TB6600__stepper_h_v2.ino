@@ -40,9 +40,9 @@ void setup() {
 }
 
 void stepper_innit(){
-  stepperY1.setMaxSpeed(800);
-  stepperY2.setMaxSpeed(800);
-  stepperX.setMaxSpeed(800);
+  stepperY1.setMaxSpeed(3200);
+  stepperY2.setMaxSpeed(3200);
+  stepperX.setMaxSpeed(3200);
 
   steppers.addStepper(stepperY1);
   steppers.addStepper(stepperY2);
@@ -80,7 +80,7 @@ void loop() {
 
     steppers.runSpeedToPosition();
 
-    delay(5000);
+    delay(1000);
 
     digitalWrite(enaPinY1, true);
     digitalWrite(enaPinY2, true);
