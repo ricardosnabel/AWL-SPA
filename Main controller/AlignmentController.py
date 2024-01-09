@@ -93,7 +93,7 @@ def convert_pixels2um(data):
     else:
         distInUm = []
         for i in data:
-            distInUm.append = PIXELSIZE * float(i)
+            distInUm.append(PIXELSIZE * float(i))
     return distInUm
 
 def convert_um2steps(data):
