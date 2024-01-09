@@ -15,6 +15,8 @@ LAYOUT = 'DLN 0 1'
 PIXELSIZE = 9.922
 STEPSIZE = .625
 MAXSTEPS = 7500 # test maximum
+DISTANCES = [216500, 140000, 308500]
+MATRIX = [[1, -0.45380875202593192868, 0.45380875202593192868], [0, 1, 0], [0, 0.0000032414910858995137763, -0.0000032414910858995137763]]
 LED = 11
 REDBUTTON = 16
 GREENBUTTON = 15
@@ -85,13 +87,29 @@ def maxsteps_check(steps):
         steps = -MAXSTEPS
     return steps
 
-def move_actuator(data):
+def convert_pixels2um(data):
+    if isinstance(data, float):
+        distInUm = PIXELSIZE * data
+    else:
+        distInUm = []
+        for i in data:
+            distInUm.append = PIXELSIZE * float(i)
+    return distInUm
+
+def convert_um2steps(data):
+    if isinstance(data, float):
+        stepsToTake = maxsteps_check(data / STEPSIZE)
+    else:
+        stepsToTake = []
+        for i in data:
+            stepsToTake.append(maxsteps_check(i / STEPSIZE))
+    return stepsToTake
+
+'''def move_actuator(data):
     YDiff = abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2]))
     if abs(float(data[YAXISCAM0])) > 5.0 or abs(float(data[YAXISCAM2])) > 5.0:
-        print("y movement")
         stepsToTake = convert_pixels2steps(data)
         if YDiff > 5:
-            print("if ydiff")
             data[YAXISCAM0] = float(data[YAXISCAM0]) * (abs(float(data[YAXISCAM0])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             data[YAXISCAM2] = float(data[YAXISCAM2]) * (abs(float(data[YAXISCAM2])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             stepsToTake = convert_pixels2steps(data)
@@ -101,10 +119,19 @@ def move_actuator(data):
         write_to_arduino(write)
         print("Steps: ", stepsToTake)
     else:
-        print("x movement")
         stepsToTake = convert_pixels2steps(data)
         write = handle_countSteps([0, 0, stepsToTake[XAXISCAM0]], False, False)
-        write_to_arduino(write)
+        write_to_arduino(write)'''
+
+
+def movement(data):
+    datainUm = convert_pixels2um(data)
+    delta = [((datainUm[XAXISCAM2]) * MATRIX[0][0]) + ((datainUm[YAXISCAM2]) * MATRIX[0][1]) + (datainUm[YAXISCAM0] * MATRIX[0][2]), # X
+             ((datainUm[XAXISCAM2]) * MATRIX[1][0]) + ((datainUm[YAXISCAM2]) * MATRIX[1][1]) + (datainUm[YAXISCAM0] * MATRIX[1][2]), # Y1
+             ((datainUm[XAXISCAM2]) * MATRIX[2][0]) + ((datainUm[YAXISCAM2]) * MATRIX[2][1]) + (datainUm[YAXISCAM0] * MATRIX[2][2])] # Delta
+    delta[2] = delta[0] + (delta[2] * (DISTANCES[2] - DISTANCES[0]))
+    stepsToTake = convert_um2steps(delta)
+    write_to_arduino([stepsToTake[1], stepsToTake[0], stepsToTake[2]])
 
 def to_neutral(steps):
     for i in range(len(steps)):
@@ -177,7 +204,7 @@ def handle_data(status):
                     if data[MEASUREDDATA][0] == 'READY\r':
                         status = 'aligned'
                     else:
-                        move_actuator(data[MEASUREDDATA])
+                        movement(data[MEASUREDDATA])
                         time.sleep(5)
             case 'aligned':
                 sendmsg(CONNEXTERN, 'OK')

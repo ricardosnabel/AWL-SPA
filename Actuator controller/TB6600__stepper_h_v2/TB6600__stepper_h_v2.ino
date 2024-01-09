@@ -54,22 +54,16 @@ long step_direction(long steps, uint8_t dirPin){
     digitalWrite(dirPin, true);
   else
     digitalWrite(dirPin, false);
-  return abs(steps);
+  return steps;
 }
 
 void loop() {
   long positions[3];
-  float readMotorY1 = 0.0;
-  float readMotorY2 = 0.0;
-  float readMotorX = 0.0;
 
   if (Serial.available() >= 0){
-    /*positions[Y1] = step_direction(Serial.readStringUntil(';').toInt(), dirPinY1);
+    positions[Y1] = step_direction(Serial.readStringUntil(';').toInt(), dirPinY1);
     positions[Y2] = step_direction(Serial.readStringUntil(';').toInt(), dirPinY2);
-    positions[X]  = step_direction(Serial.readStringUntil(';').toInt(), dirPinX);*/
-    positions[Y1] = Serial.readStringUntil(';').toInt();
-    positions[Y2] = Serial.readStringUntil(';').toInt();
-    positions[X]  = Serial.readStringUntil(';').toInt();
+    positions[X]  = step_direction(Serial.readStringUntil(';').toInt(), dirPinX);
 
     //Serial.println(positions[Y1]);
     //Serial.println(positions[Y2]);
@@ -83,34 +77,13 @@ void loop() {
 
     steppers.runSpeedToPosition();
 
-    delay(2000);
+    delay(5000);
 
     digitalWrite(enaPinY1, true);
     digitalWrite(enaPinY2, true);
     digitalWrite(enaPinX, true);
 
     Serial.println("end");
-
-    /*while((abs(stepperY1.distanceToGo()) != 0) || (abs(stepperY2.distanceToGo()) != 0) || (abs(stepperX.distanceToGo()) != 0)){
-      digitalWrite(enaPinY1, false);
-      digitalWrite(enaPinY2, false);
-      digitalWrite(enaPinX, false);
-
-      stepperY1.runToPosition();
-      stepperY2.run();
-      stepperX.run();
-
-      digitalWrite(enaPinY1, true);
-      digitalWrite(enaPinY2, true);
-      digitalWrite(enaPinX, true);
-      Serial.println(stepperY1.distanceToGo());
-      Serial.println(stepperY2.distanceToGo());
-      Serial.println(stepperX.distanceToGo());
-    }
-
-    if ((abs(stepperY1.distanceToGo()) == 0) && (abs(stepperY2.distanceToGo()) == 0) && (abs(stepperX.distanceToGo()) == 0)){
-      Serial.println("end");
-    }*/
 
   }
 }
