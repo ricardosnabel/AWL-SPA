@@ -216,6 +216,7 @@ def handle_redbutton(channel):
     time.sleep(1)
     GPIO.add_event_detect(REDBUTTON,GPIO.RISING,callback=handle_redbutton)
 
+
 def handle_data(status):
     firstRun = True
     while True:
