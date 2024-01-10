@@ -115,11 +115,13 @@ def move_actuator(data):
     if abs(float(data[YAXISCAM0])) > 5.0 or abs(float(data[YAXISCAM2])) > 5.0:
         stepsToTake = convert_pixels2steps(data)
         if YDiff > 5:
-            data[YAXISCAM0] = float(data[YAXISCAM0]) * (abs(float(data[YAXISCAM0])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
-            data[YAXISCAM2] = float(data[YAXISCAM2]) * (abs(float(data[YAXISCAM2])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
+            # data[YAXISCAM0] = float(data[YAXISCAM0]) * (abs(float(data[YAXISCAM0])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
+             data[YAXISCAM0] = float(data[YAXISCAM0]) * (abs(float(data[YAXISCAM2])) / abs(float(data[YAXISCAM0]))
+            # data[YAXISCAM2] = float(data[YAXISCAM2]) * (abs(float(data[YAXISCAM2])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
+             data[YAXISCAM2] = float(data[YAXISCAM2]) * (1 - (abs(float(data[YAXISCAM2])) / abs(float(data[YAXISCAM0])))
             stepsToTake = convert_pixels2steps(data)
-            stepsToTake[YAXISCAM0] /= 2
-            stepsToTake[YAXISCAM2] /= 2
+            # stepsToTake[YAXISCAM0] /= 2
+            # stepsToTake[YAXISCAM2] /= 2
         write_to_arduino(stepsToTake[YAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM2])
         write_to_arduino(0)
@@ -132,7 +134,6 @@ def move_actuator(data):
         write_to_arduino(stepsToTake[XAXISCAM0])
         handle_countSteps([0, 0, stepsToTake[XAXISCAM0]], False, False)
     write_to_arduino("end")
-
 
 '''def movement(data):
     datainUm = convert_pixels2um(data)
@@ -215,7 +216,6 @@ def handle_redbutton(channel):
     GPIO.remove_event_detect(REDBUTTON)
     time.sleep(1)
     GPIO.add_event_detect(REDBUTTON,GPIO.RISING,callback=handle_redbutton)
-
 
 def handle_data(status):
     firstRun = True
