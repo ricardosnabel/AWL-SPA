@@ -52,9 +52,9 @@ def receive_data(sock):
             return fragments
 
 def write_to_arduino(data):
-    time.sleep(2)
+    time.sleep(1)
     ARDUINO.write(str.encode(str(data)))
-    time.sleep(2)
+    time.sleep(1)
 
 def read_arduino():
     while True:
