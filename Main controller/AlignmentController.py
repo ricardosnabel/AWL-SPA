@@ -161,7 +161,7 @@ def rotate(data):
     print("d: ", d)
     print("Steps: ", stepsToTake)
     print()
-    write = [abs(stepsToTake) if float(data[XAXISCAM2]) < 0.0 else -stepsToTake, abs(stepsToTake) if float(data[XAXISCAM0]) < 0.0 else -stepsToTake, 0]
+    write = [abs(stepsToTake) if float(data[YAXISCAM2]) < 0.0 else -stepsToTake, abs(stepsToTake) if float(data[YAXISCAM0]) < 0.0 else -stepsToTake, 0]
     write_to_arduino(write)
 
 def to_neutral(steps):
