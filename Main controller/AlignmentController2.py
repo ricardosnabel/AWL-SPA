@@ -86,9 +86,9 @@ def maxsteps_check(steps):
 def move_actuator(data):
     write_to_arduino("start")
     YDiff = abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2]))
-    if abs(float(data[YAXISCAM0])) > 5.0 or abs(float(data[YAXISCAM2])) > 5.0:
+    if abs(float(data[YAXISCAM0])) > 2.0 or abs(float(data[YAXISCAM2])) > 3.0:
         stepsToTake = convert_pixels2steps(data)
-        if YDiff > 5:
+        if YDiff > 3:
             data[YAXISCAM0] = float(data[YAXISCAM0]) * (abs(float(data[YAXISCAM0])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             data[YAXISCAM2] = float(data[YAXISCAM2]) * (abs(float(data[YAXISCAM2])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             print(data[YAXISCAM2])
