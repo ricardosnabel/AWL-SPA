@@ -61,9 +61,9 @@ def receive_data(sock):
             return fragments
 
 def write_to_arduino(data):
-    time.sleep(2)
+    time.sleep(1)
     ARDUINO.write(str.encode(str(data)))
-    time.sleep(2)
+    #time.sleep(1)
     #read_arduino()
 
 def read_arduino():
@@ -242,7 +242,7 @@ def handle_data(status):
                     status = 'aligned'
                 else:
                     move_actuator(data[MEASUREDDATA])
-                    time.sleep(5)
+                    time.sleep(2)
             case 'aligned':
                 sendmsg(CONNEXTERN, 'OK')
                 status = 'wait for external module'
