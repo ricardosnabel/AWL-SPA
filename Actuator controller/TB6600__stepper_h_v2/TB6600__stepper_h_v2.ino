@@ -72,9 +72,9 @@ void loop() {
     positions[Y2] = Serial.readStringUntil(';').toInt();
     positions[X]  = Serial.readStringUntil(';').toInt();
 
-    //step_direction(positions[Y1], dirPinY1);
-    //step_direction(positions[Y2], dirPinY2);
-    //step_direction(positions[X], dirPinX);
+    step_direction(positions[Y1], dirPinY1);
+    step_direction(positions[Y2], dirPinY2);
+    step_direction(positions[X], dirPinX);
 
     //steppers.moveTo(positions);
     stepperY1.moveTo(positions[Y1]);
