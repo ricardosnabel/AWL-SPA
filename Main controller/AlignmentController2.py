@@ -52,9 +52,9 @@ def receive_data(sock):
             return fragments
 
 def write_to_arduino(data):
-    time.sleep(2)
+    time.sleep(1.5)
     ARDUINO.write(str.encode(str(data)))
-    time.sleep(2)
+    time.sleep(1.5)
 
 def read_arduino():
     while True:
@@ -94,8 +94,8 @@ def move_actuator(data):
             print(data[YAXISCAM2])
             print(data[YAXISCAM0])
             stepsToTake = convert_pixels2steps(data)
-            stepsToTake[YAXISCAM0] /= math.sqrt(4)
-            stepsToTake[YAXISCAM2] /= math.sqrt(4)
+            stepsToTake[YAXISCAM0] /= 1.85
+            stepsToTake[YAXISCAM2] /= 1.85
         write_to_arduino(stepsToTake[YAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM2])
         print("Steps: ", stepsToTake)
