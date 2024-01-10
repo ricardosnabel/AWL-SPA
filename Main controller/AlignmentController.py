@@ -108,7 +108,7 @@ def convert_um2steps(data):
             stepsToTake.append(maxsteps_check(i / STEPSIZE))
     return stepsToTake
 
-'''def move_actuator(data):
+def move_actuator(data):
     YDiff = abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2]))
     if abs(float(data[YAXISCAM0])) > 5.0 or abs(float(data[YAXISCAM2])) > 5.0:
         stepsToTake = convert_pixels2steps(data)
@@ -124,9 +124,9 @@ def convert_um2steps(data):
     else:
         stepsToTake = convert_pixels2steps(data)
         write = handle_countSteps([0, 0, stepsToTake[XAXISCAM0]], False, False)
-        write_to_arduino(write)'''
+        write_to_arduino(write)
 
-def movement(data):
+'''def movement(data):
     datainUm = convert_pixels2um(data)
     delta = [((datainUm[XAXISCAM2]) * MATRIX[0][0]) + ((datainUm[YAXISCAM2]) * MATRIX[0][1]) + (datainUm[YAXISCAM0] * MATRIX[0][2]), # X
              ((datainUm[XAXISCAM2]) * MATRIX[1][0]) + ((datainUm[YAXISCAM2]) * MATRIX[1][1]) + (datainUm[YAXISCAM0] * MATRIX[1][2]), # Y1
@@ -162,7 +162,7 @@ def rotate(data):
     print("Steps: ", stepsToTake)
     print()
     write = [abs(stepsToTake) if float(data[YAXISCAM2]) < 0.0 else -stepsToTake, abs(stepsToTake) if float(data[YAXISCAM0]) < 0.0 else -stepsToTake, 0]
-    write_to_arduino(write)
+    write_to_arduino(write)'''
 
 def to_neutral(steps):
     for i in range(len(steps)):
