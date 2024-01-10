@@ -235,7 +235,7 @@ def handle_data(status):
                     if data[MEASUREDDATA][0] == 'READY\r':
                         status = 'aligned'
                     else:
-                        rotate(data[MEASUREDDATA])
+                        move_actuator(data[MEASUREDDATA])
                         time.sleep(5)
             case 'aligned':
                 sendmsg(CONNEXTERN, 'OK')
