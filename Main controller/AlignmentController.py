@@ -152,7 +152,7 @@ def rotate(data):
         #stepsToTake = [stepsToTake * (abs(xPos2) / abs(xPos0)), stepsToTake]
         posDif = abs(xPos2) / abs(xPos0)
     stepsToTake = abs(convert_um2steps(d))
-    stepsToTake = stepsToTake + (stepsToTake * posDif)
+    #stepsToTake = stepsToTake + (stepsToTake * posDif)
     print("Epsilon: ", epsilon)
     print("N: ", n)
     print("M: ", m)
