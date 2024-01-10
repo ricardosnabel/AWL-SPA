@@ -16,7 +16,6 @@ MATRIX = [[1, -0.39492242595204513398, 0.39492242595204513398], [0, 1, 0], [0, 0
 DISTANCEX = 262500 / 2
 DISTANCEY = 140000 / 2
 XMOTORDISTANCE = 92000 # distance between two translation points
-DZEROVALUE = -40588.23529411765
 OMRONCONTROLLER = ['10.5.5.100', 9876]
 EXTERNCONTROLLER = ['127.0.0.1', 0]
 runApp = False
@@ -61,13 +60,14 @@ def rotate(data):
     p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
     sqrtcalc = math.sqrt((m*m) - (4 * n * p))
     d = ((-m + sqrtcalc) / (2 * n))
-    stepsToTake = abs(convert_um2steps(d))
     if abs(xPos0) > abs(xPos2):
         #stepsToTake = [stepsToTake, stepsToTake * (abs(xPos0) / abs(xPos2))]
         posDif = abs(xPos0) / abs(xPos2)
     elif abs(xPos2) > abs(xPos0):
         #stepsToTake = [stepsToTake * (abs(xPos2) / abs(xPos0)), stepsToTake]
         posDif = abs(xPos2) / abs(xPos0)
+    stepsToTake = abs(convert_um2steps(d))
+    stepsToTake = stepsToTake + (stepsToTake * posDif)
     print("Epsilon: ", epsilon)
     print("N: ", n)
     print("M: ", m)
@@ -76,7 +76,11 @@ def rotate(data):
     print("d: ", d)
     print("Steps: ", stepsToTake)
     print()
-    print(stepsToTake + (stepsToTake * posDif))
+    if abs(float(data[XAXISCAM0])) > abs(float(data[XAXISCAM2])):
+        write = [0, abs(stepsToTake) if float(data[XAXISCAM0]) < 0.0 else -stepsToTake, 0]
+    else:
+        write = [abs(stepsToTake) if float(data[XAXISCAM2]) < 0.0 else -stepsToTake, 0, 0]
+    print(write)
 
 def movement(data):
     datainUm = convert_pixels2um(data)
@@ -154,8 +158,8 @@ def handle_data(status):
                     if data[MEASUREDDATA][0] == 'READY\r':
                         status = 'aligned'
                     else:
-                        movement(data[MEASUREDDATA])
-                        print()
+                        #movement(data[MEASUREDDATA])
+                        #print()
                         rotate(data[MEASUREDDATA])
                         print()
                         i+=1

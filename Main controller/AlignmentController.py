@@ -17,6 +17,9 @@ STEPSIZE = .625
 MAXSTEPS = 7500 # test maximum
 DISTANCES = [85250, 70000, 177250]
 MATRIX = [[1, -0.39492242595204513398, 0.39492242595204513398], [0, 1, 0], [0, 0.0000056417489421720733427, -0.0000056417489421720733427]]
+DISTANCEX = 262500 / 2
+DISTANCEY = 140000 / 2
+XMOTORDISTANCE = 92000 # distance between two translation points
 LED = 11
 REDBUTTON = 16
 GREENBUTTON = 15
@@ -131,6 +134,37 @@ def movement(data):
     delta[2] = delta[1] + (abs(delta[2]) * (DISTANCES[2] - DISTANCES[0]))
     stepsToTake = convert_um2steps(delta)
     write = handle_countSteps([stepsToTake[2], stepsToTake[1], stepsToTake[0]], False, False)
+    write_to_arduino(write)
+
+def rotate(data):
+    xPos0 = float(data[XAXISCAM0])
+    xPos2 = float(data[XAXISCAM2])
+    epsilon = abs((convert_pixels2um(xPos0) + DISTANCEX) - (convert_pixels2um(xPos2) - DISTANCEX))
+    n = ((4 / (XMOTORDISTANCE * XMOTORDISTANCE)) * ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
+    m = ((2*epsilon) / XMOTORDISTANCE) * DISTANCEY
+    p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
+    sqrtcalc = math.sqrt((m*m) - (4 * n * p))
+    d = ((-m + sqrtcalc) / (2 * n))
+    if abs(xPos0) > abs(xPos2):
+        #stepsToTake = [stepsToTake, stepsToTake * (abs(xPos0) / abs(xPos2))]
+        posDif = abs(xPos0) / abs(xPos2)
+    elif abs(xPos2) > abs(xPos0):
+        #stepsToTake = [stepsToTake * (abs(xPos2) / abs(xPos0)), stepsToTake]
+        posDif = abs(xPos2) / abs(xPos0)
+    stepsToTake = abs(convert_um2steps(d))
+    stepsToTake = stepsToTake + (stepsToTake * posDif)
+    print("Epsilon: ", epsilon)
+    print("N: ", n)
+    print("M: ", m)
+    print("P: ", p)
+    print("Sqrtcalc: ", sqrtcalc)
+    print("d: ", d)
+    print("Steps: ", stepsToTake)
+    print()
+    if abs(float(data[XAXISCAM0])) > abs(float(data[XAXISCAM2])):
+        write = [abs(stepsToTake) if float(data[XAXISCAM0]) < 0.0 else -stepsToTake, 0, 0]
+    else:
+        write = [0, abs(stepsToTake) if float(data[XAXISCAM2]) < 0.0 else -stepsToTake, 0]
     write_to_arduino(write)
 
 def to_neutral(steps):
