@@ -21,7 +21,7 @@ OMRONCONTROLLER = ['10.5.5.100', 9876]
 EXTERNCONTROLLER = ['127.0.0.1', 0]
 runApp = False
 countSteps = [0, 0, 0] # [Y1, Y2, X]
-test_data1 = ['OK\r', ['-240.5077', '356.2894', '-160.6148', '169.1143\r']]
+test_data1 = ['OK\r', ['-150.8992', '232.9294', '140.4246', '-296.4908\r']]
 test_data2 = ['OK\r', ['-240.5077', '-356.2894', '-160.6148', '-169.1143\r']]
 test_data3 = ['OK\r', ['240.5077', '356.2894', '160.6148', '169.1143\r']]
 test_data4 = ['OK\r', ['240.5077', '-356.2894', '160.6148', '-169.1143\r']]
@@ -86,8 +86,10 @@ def movement(data):
              ((datainUm[XAXISCAM2]) * MATRIX[2][0]) + ((datainUm[YAXISCAM2]) * MATRIX[2][1]) + (datainUm[YAXISCAM0] * MATRIX[2][2])] # Delta
     print("Delta: ", delta)
     print()
-    delta[2] = delta[1] + (delta[2] * (DISTANCES[2] - DISTANCES[0]))
-    print("Delta2: " ,delta)
+    print(delta[2] * (DISTANCES[2] - DISTANCES[0]))
+    print(DISTANCES[2] - DISTANCES[0])
+    delta[2] = delta[1] + (abs(delta[2]) * (DISTANCES[2] - DISTANCES[0]))
+    print("Delta2: ", delta)
     print()
     stepsToTake = convert_um2steps(delta)
     print([stepsToTake[2], stepsToTake[1], stepsToTake[0]])

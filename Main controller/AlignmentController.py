@@ -128,7 +128,7 @@ def movement(data):
     delta = [((datainUm[XAXISCAM2]) * MATRIX[0][0]) + ((datainUm[YAXISCAM2]) * MATRIX[0][1]) + (datainUm[YAXISCAM0] * MATRIX[0][2]), # X
              ((datainUm[XAXISCAM2]) * MATRIX[1][0]) + ((datainUm[YAXISCAM2]) * MATRIX[1][1]) + (datainUm[YAXISCAM0] * MATRIX[1][2]), # Y1
              ((datainUm[XAXISCAM2]) * MATRIX[2][0]) + ((datainUm[YAXISCAM2]) * MATRIX[2][1]) + (datainUm[YAXISCAM0] * MATRIX[2][2])] # Delta
-    delta[2] = delta[1] + (delta[2] * (DISTANCES[2] - DISTANCES[0]))
+    delta[2] = delta[1] + (abs(delta[2]) * (DISTANCES[2] - DISTANCES[0]))
     stepsToTake = convert_um2steps(delta)
     for i in range(len(stepsToTake)):
         if stepsToTake[i] < 0:
