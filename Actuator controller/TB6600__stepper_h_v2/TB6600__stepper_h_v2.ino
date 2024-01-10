@@ -20,7 +20,7 @@ AccelStepper stepperY(1, pulPinX, dirPinX);
 
 void setup() {
   Serial.setTimeout(2);
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode(dirPinY1, OUTPUT);
   pinMode(pulPinY1, OUTPUT);
   pinMode(enaPinY1, OUTPUT);
