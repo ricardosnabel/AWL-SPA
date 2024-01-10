@@ -1,5 +1,4 @@
 #include <AccelStepper.h>
-#include <MultiStepper.h>
 
 #define pulPinY2      10
 #define dirPinY2      9
@@ -10,19 +9,18 @@
 #define pulPinX       4
 #define dirPinX       3
 #define enaPinX       2
-#define Y1            0
-#define Y2            1
-#define X             2
+#define startPosition 0
 
-AccelStepper stepperY1(1, pulPinY1, dirPinY1);
-AccelStepper stepperY2(1, pulPinY2, dirPinY2);
-AccelStepper stepperX(1, pulPinX, dirPinX);
+byte index, status;
+int *cam;
 
-MultiStepper steppers;
+AccelStepper stepperX1(1, pulPinY1, dirPinY1);
+AccelStepper stepperX2(1, pulPinY2, dirPinY2);
+AccelStepper stepperY(1, pulPinX, dirPinX);
 
 void setup() {
   Serial.setTimeout(2);
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(dirPinY1, OUTPUT);
   pinMode(pulPinY1, OUTPUT);
   pinMode(enaPinY1, OUTPUT);
@@ -35,76 +33,115 @@ void setup() {
 
   stepper_innit();
 
-  digitalWrite(enaPinY1, true);
   digitalWrite(enaPinY2, true);
+  digitalWrite(enaPinY1, true);
   digitalWrite(enaPinX, true);
+
+  index = 0;
+  status = 0;
+  cam = 0;
 }
 
 void stepper_innit(){
-  stepperX.setMaxSpeed(3200);
-  //stepperX.setAcceleration(400);
-  //stepperX.setSpeed(3200);
-  stepperY2.setMaxSpeed(3200);
-  //stepperY2.setAcceleration(400);
-  //stepperY2.setSpeed(3200);
-  stepperY1.setMaxSpeed(3200);
-  //stepperY1.setAcceleration(400);
-  //stepperY1.setSpeed(3200);
-
-  steppers.addStepper(stepperY1);
-  steppers.addStepper(stepperY2);
-  steppers.addStepper(stepperX);
+  stepperX1.setMaxSpeed(3200);
+  stepperX1.setAcceleration(400);
+  stepperX1.setSpeed(3200);
+  stepperX2.setMaxSpeed(3200);
+  stepperX2.setAcceleration(400);
+  stepperX2.setSpeed(3200);
+  stepperY.setMaxSpeed(3200);
+  stepperY.setAcceleration(400);
+  stepperY.setSpeed(3200);
 }
 
-long step_direction(long steps, uint8_t dirPin){
-  if (steps >= 0)
-    digitalWrite(dirPin, true);
-  else
-    digitalWrite(dirPin, false);
-  return abs(steps);
+void step_direction(int steps, int dirPin){
+    if (steps > 0)
+      digitalWrite(dirPin, true);
+    else
+      digitalWrite(dirPin, false);
+}
+
+void PulseSignal(int steps, int enaPin, int dirPin){
+  print_serial("Steps: ", steps);
+  step_direction(steps, dirPin);
+  digitalWrite(enaPin, false);
+  if (enaPin == enaPinY1){
+    stepperX1.moveTo(steps);
+    stepperX1.runToPosition();
+    stepperX1.stop();
+    stepperX1.setCurrentPosition(0);
+  } else if (enaPin == enaPinY2){
+    stepperX2.moveTo(steps);
+    stepperX2.runToPosition();
+    stepperX2.stop();
+    stepperX2.setCurrentPosition(0);
+  } else if (enaPin == enaPinX){
+    stepperY.moveTo(steps);
+    stepperY.runToPosition();
+    stepperY.stop();
+    stepperY.setCurrentPosition(0);
+  }
+  digitalWrite(enaPin, true);
+}
+
+void print_serial(int data){
+  Serial.println(data);
+}
+
+void print_serial(String data){
+  Serial.println(data);
+}
+
+void print_serial(String txtData, int numData){
+  Serial.print(txtData);
+  Serial.println(numData);
 }
 
 void loop() {
-  long positions[3];
-
-  if (Serial.available() >= 0){
-    positions[Y1] = Serial.readStringUntil(';').toInt();
-    positions[Y2] = Serial.readStringUntil(';').toInt();
-    positions[X]  = Serial.readStringUntil(';').toInt();
-
-    //step_direction(positions[Y1], dirPinY1);
-    //step_direction(positions[Y2], dirPinY2);
-    //step_direction(positions[X], dirPinX);
-
-    steppers.moveTo(positions);
-    //stepperY1.moveTo(positions[Y1]);
-    //stepperY2.moveTo(positions[Y2]);
-    //stepperX.moveTo(positions[X]);
-
-
-    digitalWrite(enaPinY1, false);
-    digitalWrite(enaPinY2, false);
-    digitalWrite(enaPinX, false);
-    delay(2000);
-
-    steppers.runSpeedToPosition();
-    //stepperY1.runToPosition();
-
-    delay(2000);
-    
-    /*stepperY2.runToPosition();
-
-    delay(2000);
-    
-    stepperX.runToPosition();
-
-    delay(2000); */
-
-
-    digitalWrite(enaPinY1, true);
-    digitalWrite(enaPinY2, true);
-    digitalWrite(enaPinX, true);
-
-    Serial.println("end");
+  String readSerial;
+  int enaPin = 0;
+  int dirPin = 0;
+  switch (status){
+    case 0:
+      readSerial = Serial.readString();
+      if (readSerial == "start"){
+        status = 1;
+      }
+      break;
+    case 1:
+      if (Serial.available() > 0){
+        readSerial = Serial.readString();
+        if (readSerial == "end"){
+          index = 0;
+          cam = 0;
+          status = 0;
+        }
+        else {
+          index++;
+          cam[index] = readSerial.toInt();
+          status = 2;
+        }
+      }
+      break;
+    case 2:
+      if (index == 1){
+        enaPin = enaPinY1;
+        dirPin = dirPinY1;
+      }
+      else if (index == 2){
+        enaPin = enaPinY2;
+        dirPin = dirPinY2;
+      }
+      else if (index == 3){
+        enaPin = enaPinX;
+        dirPin = dirPinX;
+      } else {
+        status = 1;
+        break;
+      }
+      //print_serial("enaPin: ", enaPin);
+      PulseSignal(cam[index], enaPin, dirPin);
+      status = 1;
+      break;
   }
 }

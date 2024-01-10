@@ -61,10 +61,9 @@ def receive_data(sock):
             return fragments
 
 def write_to_arduino(data):
-    time.sleep(2)
-    ARDUINO.write(str.encode(str(data)))
-    time.sleep(2)
-    read_arduino()
+    message = str(data[0]) + ";" + str(data[1]) + ";" + str(data[2]) + ";"
+    print("Send Message: ", message)
+    ARDUINO.write(str.encode(message))
 
 def read_arduino():
     while True:
@@ -110,7 +109,6 @@ def convert_um2steps(data):
     return stepsToTake
 
 def move_actuator(data):
-    write_to_arduino("start")
     YDiff = abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2]))
     if abs(float(data[YAXISCAM0])) > 5.0 or abs(float(data[YAXISCAM2])) > 5.0:
         stepsToTake = convert_pixels2steps(data)
@@ -120,19 +118,13 @@ def move_actuator(data):
             stepsToTake = convert_pixels2steps(data)
             stepsToTake[YAXISCAM0] /= 2
             stepsToTake[YAXISCAM2] /= 2
-        write_to_arduino(stepsToTake[YAXISCAM0])
-        write_to_arduino(stepsToTake[YAXISCAM2])
-        write_to_arduino(0)
-        handle_countSteps([stepsToTake[YAXISCAM0], stepsToTake[YAXISCAM0], 0], False, False)
+        write = handle_countSteps([stepsToTake[YAXISCAM0], stepsToTake[YAXISCAM2], 0], False, False)
+        write_to_arduino(write)
         print("Steps: ", stepsToTake)
     else:
         stepsToTake = convert_pixels2steps(data)
-        write_to_arduino(0)
-        write_to_arduino(0)
-        write_to_arduino(stepsToTake[XAXISCAM0])
-        handle_countSteps([0, 0, stepsToTake[XAXISCAM0]], False, False)
-    write_to_arduino("end")
-
+        write = handle_countSteps([0, 0, stepsToTake[XAXISCAM0]], False, False)
+        write_to_arduino(write)
 
 '''def movement(data):
     datainUm = convert_pixels2um(data)
@@ -173,13 +165,12 @@ def rotate(data):
     write_to_arduino(write)'''
 
 def to_neutral(steps):
-    write_to_arduino('start')
     for i in range(len(steps)):
         if steps[i] >= 0:
-            write_to_arduino(-steps[i])
+            steps[i] = -steps[i]
         else:
-            write_to_arduino(abs(steps[i]))
-    write_to_arduino('end')
+            steps[i] = abs(steps[i])
+    return steps
 
 def handle_countSteps(steps, clear, getcount):
     global countSteps
@@ -234,14 +225,18 @@ def handle_data(status):
                 if data[0][0] == 'OK\r':
                     status = 'unaligned'
             case 'unaligned':
-                sendmsg(CONNOMRON, MEASURE)
-                data = receive_data(CONNOMRON)
-                print(data)
-                if data[MEASUREDDATA][0] == 'READY\r':
-                    status = 'aligned'
-                else:
-                    move_actuator(data[MEASUREDDATA])
-                    time.sleep(5)
+                reading = read_arduino()
+                if (reading == b'end\r\n') or firstRun:
+                    reading = ""
+                    firstRun = False
+                    sendmsg(CONNOMRON, MEASURE)
+                    data = receive_data(CONNOMRON)
+                    print(data)
+                    if data[MEASUREDDATA][0] == 'READY\r':
+                        status = 'aligned'
+                    else:
+                        move_actuator(data[MEASUREDDATA])
+                        time.sleep(5)
             case 'aligned':
                 sendmsg(CONNEXTERN, 'OK')
                 status = 'wait for external module'
@@ -249,7 +244,7 @@ def handle_data(status):
                 if receive_data(CONNEXTERN) == 'OK\r':
                     status = 'return to neutral'
             case 'return to neutral':
-                to_neutral(handle_countSteps(0, False, True))
+                write_to_arduino(to_neutral(handle_countSteps(0, False, True)))
                 status = 'waiting for plate'
 
 if __name__ == '__main__':
