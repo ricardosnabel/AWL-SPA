@@ -123,7 +123,6 @@ def convert_um2steps(data):
         write = handle_countSteps([0, 0, stepsToTake[XAXISCAM0]], False, False)
         write_to_arduino(write)'''
 
-
 def movement(data):
     datainUm = convert_pixels2um(data)
     delta = [((datainUm[XAXISCAM2]) * MATRIX[0][0]) + ((datainUm[YAXISCAM2]) * MATRIX[0][1]) + (datainUm[YAXISCAM0] * MATRIX[0][2]), # X
@@ -131,7 +130,14 @@ def movement(data):
              ((datainUm[XAXISCAM2]) * MATRIX[2][0]) + ((datainUm[YAXISCAM2]) * MATRIX[2][1]) + (datainUm[YAXISCAM0] * MATRIX[2][2])] # Delta
     delta[2] = delta[1] + (delta[2] * (DISTANCES[2] - DISTANCES[0]))
     stepsToTake = convert_um2steps(delta)
+    for i in range(len(stepsToTake)):
+        if stepsToTake[i] < 0:
+            stepsToTake[i] = abs(stepsToTake[i])
+        else:
+            stepsToTake[i] = -stepsToTake[i]
     write_to_arduino([stepsToTake[2], stepsToTake[1], stepsToTake[0]])
+
+
 
 def to_neutral(steps):
     for i in range(len(steps)):

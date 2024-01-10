@@ -13,6 +13,10 @@ STEPSIZE = .625
 MAXSTEPS = 7500 # test maximum
 DISTANCES = [85250, 70000, 177250]
 MATRIX = [[1, -0.39492242595204513398, 0.39492242595204513398], [0, 1, 0], [0, 0.0000056417489421720733427, -0.0000056417489421720733427]]
+DISTANCEX = 262500 / 2
+DISTANCEY = 140000 / 2
+XMOTORDISTANCE = 92000 # distance between two translation points
+DZEROVALUE = -40588.23529411765
 OMRONCONTROLLER = ['10.5.5.100', 9876]
 EXTERNCONTROLLER = ['127.0.0.1', 0]
 runApp = False
@@ -48,6 +52,32 @@ def maxsteps_check(steps):
         steps = -MAXSTEPS
     return steps
 
+def rotate(data):
+    xPos0 = float(data[XAXISCAM0])
+    xPos2 = float(data[XAXISCAM2])
+    epsilon = abs((convert_pixels2um(xPos0) + DISTANCEX) - (convert_pixels2um(xPos2) - DISTANCEX))
+    n = ((4 / (XMOTORDISTANCE * XMOTORDISTANCE)) * ((DISTANCEX * DISTANCEX) + (DISTANCEY * DISTANCEY)))
+    m = ((2*epsilon) / XMOTORDISTANCE) * DISTANCEY
+    p = ((epsilon * epsilon) / 4) - (DISTANCEX * DISTANCEX)
+    sqrtcalc = math.sqrt((m*m) - (4 * n * p))
+    d = ((-m + sqrtcalc) / (2 * n))
+    stepsToTake = abs(convert_um2steps(d))
+    if abs(xPos0) > abs(xPos2):
+        #stepsToTake = [stepsToTake, stepsToTake * (abs(xPos0) / abs(xPos2))]
+        posDif = abs(xPos0) / abs(xPos2)
+    elif abs(xPos2) > abs(xPos0):
+        #stepsToTake = [stepsToTake * (abs(xPos2) / abs(xPos0)), stepsToTake]
+        posDif = abs(xPos2) / abs(xPos0)
+    print("Epsilon: ", epsilon)
+    print("N: ", n)
+    print("M: ", m)
+    print("P: ", p)
+    print("Sqrtcalc: ", sqrtcalc)
+    print("d: ", d)
+    print("Steps: ", stepsToTake)
+    print()
+    print(stepsToTake + (stepsToTake * posDif))
+
 def movement(data):
     datainUm = convert_pixels2um(data)
     print(datainUm)
@@ -56,11 +86,11 @@ def movement(data):
              ((datainUm[XAXISCAM2]) * MATRIX[2][0]) + ((datainUm[YAXISCAM2]) * MATRIX[2][1]) + (datainUm[YAXISCAM0] * MATRIX[2][2])] # Delta
     print("Delta: ", delta)
     print()
-    delta[2] = delta[0] + (delta[2] * (DISTANCES[2] - DISTANCES[0]))
+    delta[2] = delta[1] + (delta[2] * (DISTANCES[2] - DISTANCES[0]))
     print("Delta2: " ,delta)
     print()
     stepsToTake = convert_um2steps(delta)
-    print([stepsToTake[1], stepsToTake[0], stepsToTake[2]])
+    print([stepsToTake[2], stepsToTake[1], stepsToTake[0]])
 
 def to_neutral(steps):
     for i in range(len(steps)):
@@ -115,7 +145,7 @@ def handle_data(status):
                 status = 'unaligned'
             case 'unaligned':
                     #handle_test()
-                    time.sleep(2)
+                    time.sleep(1)
                     test_data = test_data_arr[i]
                     data = test_data
                     print(data)
@@ -123,6 +153,8 @@ def handle_data(status):
                         status = 'aligned'
                     else:
                         movement(data[MEASUREDDATA])
+                        print()
+                        rotate(data[MEASUREDDATA])
                         print()
                         i+=1
                         
