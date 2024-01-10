@@ -242,7 +242,7 @@ def handle_data(status):
                     status = 'aligned'
                 else:
                     move_actuator(data[MEASUREDDATA])
-                    time.sleep(2)
+                    time.sleep(5)
             case 'aligned':
                 sendmsg(CONNEXTERN, 'OK')
                 status = 'wait for external module'
