@@ -64,7 +64,7 @@ def write_to_arduino(data):
     time.sleep(2)
     ARDUINO.write(str.encode(str(data)))
     time.sleep(2)
-    read_arduino()
+    #read_arduino()
 
 def read_arduino():
     while True:
