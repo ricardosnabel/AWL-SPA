@@ -132,7 +132,7 @@ def movement(data):
     delta[2] = delta[1] + (delta[2] * (DISTANCES[2] - DISTANCES[0]))
     stepsToTake = convert_um2steps(delta)
     #write_to_arduino([stepsToTake[2], stepsToTake[1], stepsToTake[0]])
-    write_to_arduino([1000, 1000, 0])
+    write_to_arduino([-1000, -1000, 0])
 
 def to_neutral(steps):
     for i in range(len(steps)):
