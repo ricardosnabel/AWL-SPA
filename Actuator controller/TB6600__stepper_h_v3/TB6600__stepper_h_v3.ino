@@ -42,15 +42,6 @@ void setup() {
 }
 
 void stepper_innit(){
-  stepperX1.setMaxSpeed(1600);
-  stepperX1.setAcceleration(200);
-  stepperX1.setSpeed(1600);
-  stepperX2.setMaxSpeed(1600);
-  stepperX2.setAcceleration(200);
-  stepperX2.setSpeed(1600);
-  stepperY.setMaxSpeed(1600);
-  stepperY.setAcceleration(200);
-  stepperY.setSpeed(1600);
   stepperX1.setMaxSpeed(3200);
   stepperX1.setAcceleration(400);
   stepperX1.setSpeed(3200);
@@ -103,4 +94,53 @@ void print_serial(String data){
 void print_serial(String txtData, int numData){
   Serial.print(txtData);
   Serial.println(numData);
+}
 
+void loop() {
+  String readSerial;
+  int enaPin = 0;
+  int dirPin = 0;
+  switch (status){
+    case 0:
+      readSerial = Serial.readString();
+      if (readSerial == "start"){
+        status = 1;
+      }
+      break;
+    case 1:
+      if (Serial.available() > 0){
+        readSerial = Serial.readString();
+        if (readSerial == "end"){
+          index = 0;
+          cam = 0;
+          status = 0;
+        }
+        else {
+          index++;
+          cam[index] = readSerial.toInt();
+          status = 2;
+        }
+      }
+      break;
+    case 2:
+      if (index == 1){
+        enaPin = enaPinY1;
+        dirPin = dirPinY1;
+      }
+      else if (index == 2){
+        enaPin = enaPinY2;
+        dirPin = dirPinY2;
+      }
+      else if (index == 3){
+        enaPin = enaPinX;
+        dirPin = dirPinX;
+      } else {
+        status = 1;
+        break;
+      }
+      print_serial("enaPin: ", enaPin);
+      PulseSignal(cam[index], enaPin, dirPin);
+      status = 1;
+      break;
+  }
+}
