@@ -124,7 +124,6 @@ def move_actuator(data):
             stepsToTake[YAXISCAM2] /= math.sqrt(2)
         write_to_arduino(stepsToTake[YAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM2])
-        write_to_arduino(0)
         handle_countSteps([stepsToTake[YAXISCAM0], stepsToTake[YAXISCAM0], 0], False, False)
         print("Steps: ", stepsToTake)
     else:
