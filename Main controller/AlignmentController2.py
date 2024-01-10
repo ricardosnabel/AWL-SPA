@@ -52,9 +52,9 @@ def receive_data(sock):
             return fragments
 
 def write_to_arduino(data):
-    time.sleep(1.5)
+    time.sleep(2)
     ARDUINO.write(str.encode(str(data)))
-    time.sleep(1.5)
+    time.sleep(2)
 
 def read_arduino():
     while True:
@@ -86,16 +86,16 @@ def maxsteps_check(steps):
 def move_actuator(data):
     write_to_arduino("start")
     YDiff = abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2]))
-    if abs(float(data[YAXISCAM0])) > 2.0 or abs(float(data[YAXISCAM2])) > 3.0:
+    if abs(float(data[YAXISCAM0])) > 2.0 or abs(float(data[YAXISCAM2])) > 2.0:
         stepsToTake = convert_pixels2steps(data)
-        if YDiff > 3:
+        if YDiff > 4:
             data[YAXISCAM0] = float(data[YAXISCAM0]) * (abs(float(data[YAXISCAM0])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             data[YAXISCAM2] = float(data[YAXISCAM2]) * (abs(float(data[YAXISCAM2])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             print(data[YAXISCAM2])
             print(data[YAXISCAM0])
             stepsToTake = convert_pixels2steps(data)
-            stepsToTake[YAXISCAM0] /= 1.85
-            stepsToTake[YAXISCAM2] /= 1.85
+            stepsToTake[YAXISCAM0] /= 1.84
+            stepsToTake[YAXISCAM2] /= 1.84
         write_to_arduino(stepsToTake[YAXISCAM0])
         write_to_arduino(stepsToTake[YAXISCAM2])
         print("Steps: ", stepsToTake)
