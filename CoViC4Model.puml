@@ -1,0 +1,7 @@
+@startuml BaseSystem
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+SHOW_LEGEND()
+
+@enduml

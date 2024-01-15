@@ -1,0 +1,27 @@
+@startuml CoViComponent
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title CoVi C4 System Component diagram
+
+System_Ext(transport, "Transport", "Transport system providing BiPolar Plates")
+System_Ext(screenprint, "Screen printing", "Screen Printing module")
+
+System_Boundary(covi, "CoVi Controller"){
+    Component(connection, "Connection", "Socket", "Creates a connection between other devices.")
+    Component(convert, "Convertion", "Python", "Converts the incoming data.")
+    Component(movement, "Movement", "Python", "Calculates the movement.")
+    Component(run, "Application", "Python", "Run the application.")
+}
+
+BiRel(transport, connection, "")
+BiRel(screenprint, connection, "")
+Rel(covi, connection, "")
+Rel(covi, run, "")
+Rel(run, movement, "")
+Rel(movement, convert, "")
+Rel(movement, connection, "")
+
+SHOW_LEGEND()
+
+@enduml

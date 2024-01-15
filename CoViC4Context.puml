@@ -1,0 +1,17 @@
+@startuml CoViContext
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title CoVi C4 System Context diagram
+
+System_Ext(transport, "Transport")
+System_Ext(screenprint, "Screen printing")
+
+System(covi, "CoVi")
+
+BiRel(transport, covi, "")
+BiRel(covi, screenprint, "")
+
+SHOW_LEGEND()
+
+@enduml

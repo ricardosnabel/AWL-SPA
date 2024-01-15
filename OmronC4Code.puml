@@ -1,0 +1,23 @@
+@startuml OmronController
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+[*] --> CameraImageInput
+CameraImageInput : SC.MEASURED.X.POSITION0#
+CameraImageInput : SC.MEASURED.Y.POSITION0#
+CameraImageInput : SC.MEASURED.X.POSITION2#
+CameraImageInput : SC.MEASURED.Y.POSITION2#
+CameraImageInput --> ShapeSearchIII
+ShapeSearchIII : SY.REFERENCE.X.POSITION0#
+ShapeSearchIII : SY.REFERENCE.Y.POSITION0#
+ShapeSearchIII : SY.REFERENCE.X.POSITION2#
+ShapeSearchIII : SY.REFERENCE.Y.POSITION2#
+ShapeSearchIII : SC.MEASURED.X.POSITION0#
+ShapeSearchIII : SC.MEASURED.Y.POSITION0#
+ShapeSearchIII : SC.MEASURED.X.POSITION2#
+ShapeSearchIII : SC.MEASURED.Y.POSITION2#
+
+ShapeSearchIII --> Calculation
+Calculation --> Resultoutput
+Calculation --> Dataoutput
+Resultoutput --> [*]
+Dataoutput --> [*]
+@enduml

@@ -1,0 +1,25 @@
+@startuml CoViContainer
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title CoVi C4 System Container diagram
+
+System_Ext(transport, "Transport", "Transport system providing BiPolar Plates")
+System_Ext(screenprint, "Screen printing", "Screen Printing module")
+
+System(covi, "CoVi")
+
+System_Boundary(covi, "CoVi"){
+    Container(coviController, "CoVi Controller", "Python")
+    Container(omronController, "Omron Controller", "Omron Vision")
+    Container(actuatorController, "Actuator Controller", "C/C++")
+}
+
+BiRel(transport, coviController, "")
+BiRel(coviController, screenprint, "")
+BiRel(coviController, omronController, "")
+Rel(coviController, actuatorController, "")
+
+SHOW_LEGEND()
+
+@enduml
