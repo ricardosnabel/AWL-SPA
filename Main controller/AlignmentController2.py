@@ -177,7 +177,7 @@ def run_covi(status):
                 case 'plate arrived':
                     sendmsg(CONNOMRON, MEASURE)
                     data = receive_data(CONNOMRON)
-                    if data[0][0] == 'OK\r':
+                    if data[0][0] == 'OK\r' and data[MEASUREDDATA][0] is not 'OK':
                         status = 'unaligned'
                 case 'unaligned':
                     sendmsg(CONNOMRON, MEASURE)
@@ -194,7 +194,6 @@ def run_covi(status):
                     #if receive_data(CONNEXTERN) == 'OK\r':
                     status = 'return to neutral'
                 case 'return to neutral':
-                    runAppp = False
                     status = 'waiting for plate'
 
 if __name__ == '__main__':
