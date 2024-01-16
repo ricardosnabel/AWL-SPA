@@ -184,6 +184,7 @@ def run_covi(status):
                     data = receive_data(CONNOMRON)
                     print(data[MEASUREDDATA])
                     if data[1][0] == 'OK':
+                        runApp = False
                         status = 'aligned'
                     else:
                         move_actuator(data[MEASUREDDATA])
@@ -194,7 +195,6 @@ def run_covi(status):
                     #if receive_data(CONNEXTERN) == 'OK\r':
                     status = 'return to neutral'
                 case 'return to neutral':
-                    runApp = False
                     status = 'waiting for plate'
 
 if __name__ == '__main__':
