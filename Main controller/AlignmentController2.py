@@ -75,8 +75,8 @@ def GPIO_init():
     GPIO.setup(LED, GPIO.OUT)
     GPIO.setup(REDBUTTON, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(GREENBUTTON, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.add_event_detect(REDBUTTON, GPIO.RISING, callback=handle_redbutton, bouncetime=1000)
-    GPIO.add_event_detect(GREENBUTTON, GPIO.RISING, callback=handle_greenbutton, bouncetime=1000)
+    GPIO.add_event_detect(REDBUTTON, GPIO.RISING, callback=handle_buttonINT, bouncetime=1000)       # handle_redbutton
+    GPIO.add_event_detect(GREENBUTTON, GPIO.RISING, callback=handle_buttonINT, bouncetime=1000)     # handle_greenbutton
 
 def sendmsg(sock, message):
     sock.send(message.encode())
@@ -143,6 +143,17 @@ def move_actuator(data):
         write_to_serial(0)
         write_to_serial(stepsToTake[XAXISCAM0])
     write_to_serial("end")
+
+def handle_buttonINT(channel):
+    global runApp
+    if channel == REDBUTTON:
+        runApp = False
+        print("red")
+        GPIO.output(11, 0)
+    elif channel == GREENBUTTON:
+        runApp = True
+        print("green")
+        GPIO.output(11, 1)
 
 def handle_greenbutton(channel):
     global runApp
