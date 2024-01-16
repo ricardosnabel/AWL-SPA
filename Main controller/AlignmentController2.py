@@ -168,6 +168,7 @@ def handle_redbutton(channel):
     GPIO.output(11, 0)
 
 def run_covi(status):
+    global runApp
     while True:
         while runApp:
             match status:
