@@ -188,7 +188,7 @@ def run_covi(status):
                     else:
                         move_actuator(data[MEASUREDDATA])
                 case 'aligned':
-                    sendmsg(CONNEXTERN, 'OK')
+                    #sendmsg(CONNEXTERN, 'OK')
                     status = 'wait for external module'
                 case 'wait for external module':
                     if receive_data(CONNEXTERN) == 'OK\r':
