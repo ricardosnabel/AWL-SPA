@@ -160,8 +160,8 @@ def run_covi(status):
     while True:
         match status:
             case 'waiting for plate':
-                if runApp:
-                    status = 'plate arrived'
+                #if runApp:
+                status = 'plate arrived'
             case 'plate arrived':
                 sendmsg(CONNOMRON, MEASURE)
                 data = receive_data(CONNOMRON)
@@ -189,7 +189,8 @@ if __name__ == '__main__':
     conn_init()
     status = 'waiting for plate'
     try:
-        run_covi(status)
+        while runApp:
+            run_covi(status)
     except KeyboardInterrupt:
         GPIO.cleanup()
         CONNOMRON.close()
