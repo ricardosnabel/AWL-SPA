@@ -116,10 +116,8 @@ def convert_pixels2steps(data):
     return stepsToTake
 
 def maxsteps_check(steps):
-    if steps > MAXSTEPS:
-        steps = MAXSTEPS
-    elif steps < -MAXSTEPS:
-        steps = -MAXSTEPS
+    if steps > MAXSTEPS or steps < -MAXSTEPS:
+        steps = 0
     return steps
 
 def move_actuator(data):
