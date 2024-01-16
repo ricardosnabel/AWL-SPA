@@ -191,8 +191,8 @@ def run_covi(status):
                     #sendmsg(CONNEXTERN, 'OK')
                     status = 'wait for external module'
                 case 'wait for external module':
-                    if receive_data(CONNEXTERN) == 'OK\r':
-                        status = 'return to neutral'
+                    #if receive_data(CONNEXTERN) == 'OK\r':
+                    status = 'return to neutral'
                 case 'return to neutral':
                     status = 'waiting for plate'
 
