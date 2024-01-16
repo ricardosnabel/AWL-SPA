@@ -183,7 +183,7 @@ def run_covi(status):
                     sendmsg(CONNOMRON, MEASURE)
                     data = receive_data(CONNOMRON)
                     print(data[MEASUREDDATA])
-                    if data[1][0] == 'READY\r':
+                    if data[1][0] == 'OK':
                         status = 'aligned'
                     else:
                         move_actuator(data[MEASUREDDATA])
