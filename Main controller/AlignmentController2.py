@@ -194,6 +194,7 @@ def run_covi(status):
                     #if receive_data(CONNEXTERN) == 'OK\r':
                     status = 'return to neutral'
                 case 'return to neutral':
+                    runAppp = False
                     status = 'waiting for plate'
 
 if __name__ == '__main__':
