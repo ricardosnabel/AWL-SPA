@@ -158,39 +158,39 @@ def handle_redbutton(channel):
 
 def run_covi(status):
     while True:
-        match status:
-            case 'waiting for plate':
-                #if runApp:
-                status = 'plate arrived'
-            case 'plate arrived':
-                sendmsg(CONNOMRON, MEASURE)
-                data = receive_data(CONNOMRON)
-                if data[0][0] == 'OK\r':
-                    status = 'unaligned'
-            case 'unaligned':
-                sendmsg(CONNOMRON, MEASURE)
-                data = receive_data(CONNOMRON)
-                print(data[MEASUREDDATA])
-                if data[1][0] == 'READY\r':
-                    status = 'aligned'
-                else:
-                    move_actuator(data[MEASUREDDATA])
-            case 'aligned':
-                sendmsg(CONNEXTERN, 'OK')
-                status = 'wait for external module'
-            case 'wait for external module':
-                if receive_data(CONNEXTERN) == 'OK\r':
-                    status = 'return to neutral'
-            case 'return to neutral':
-                status = 'waiting for plate'
+        while runApp:
+            match status:
+                case 'waiting for plate':
+                    #if runApp:
+                    status = 'plate arrived'
+                case 'plate arrived':
+                    sendmsg(CONNOMRON, MEASURE)
+                    data = receive_data(CONNOMRON)
+                    if data[0][0] == 'OK\r':
+                        status = 'unaligned'
+                case 'unaligned':
+                    sendmsg(CONNOMRON, MEASURE)
+                    data = receive_data(CONNOMRON)
+                    print(data[MEASUREDDATA])
+                    if data[1][0] == 'READY\r':
+                        status = 'aligned'
+                    else:
+                        move_actuator(data[MEASUREDDATA])
+                case 'aligned':
+                    sendmsg(CONNEXTERN, 'OK')
+                    status = 'wait for external module'
+                case 'wait for external module':
+                    if receive_data(CONNEXTERN) == 'OK\r':
+                        status = 'return to neutral'
+                case 'return to neutral':
+                    status = 'waiting for plate'
 
 if __name__ == '__main__':
     GPIO_init()
     conn_init()
     status = 'waiting for plate'
     try:
-        while runApp:
-            run_covi(status)
+        run_covi(status)
     except KeyboardInterrupt:
         GPIO.cleanup()
         CONNOMRON.close()
