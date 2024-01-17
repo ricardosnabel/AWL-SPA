@@ -1,13 +1,40 @@
 @startuml CoViCode
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
 
-skinparam classAttributeIconSize 0
+state coviController{
+    state "Waiting for plate" as waitforplate {
+    }
+    state "Plate arrived" as platearrived {
 
-class Covi{
-    -measureddata
-    
+    }
+    state "Unaligned" as unaligned {
+        state calculateMovement
+    }
+    state "Aligned" as aligned
+    state "Wait for screen print" as waitforscreenprint
+    state "Return to neutral" as returntoneutral {
+
+    }
+
+    state communicateTransport
+    state communicateOmron
+    state communicateActuator
+    state communicateScreenPrint
+    state convertData
+
+    [*] --> waitforplate
+    waitforplate --> platearrived : New plate arrived
+    platearrived --> unaligned : Plate is not aligned
+    unaligned --> aligned : Plate is aligned
+    aligned --> waitforscreenprint : Message screen printing module
+    waitforscreenprint --> returntoneutral : Screen printing is done
 
 }
 
+state greenButtonPressed
+state redButtonPressed
+
+greenButtonPressed --> coviController : Starts the application
+redButtonPressed --> coviController : Stops the application
 
 @enduml

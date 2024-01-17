@@ -1,0 +1,10 @@
+@startuml CoViCode
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
+
+class conn {
+
+}
+
+class 
+
+@enduml

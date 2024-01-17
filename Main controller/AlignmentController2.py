@@ -34,8 +34,8 @@ When data is received, this will be converted from pixels to steps. To remain th
 To ensure the safety of the compliant mechanism, the controller checks if the amount of steps is not greater than the steps stored in the variable 'MAXSTEPS'.
 
 Start and stop the controller:
-To be used in production, the controller will start when it receives a message from the transport system. Before using this controller, change the variable 'TRANSPORTRECV' to the expected message the controller will receive. In the state 'waiting for plate' in function run_covi() add the following two lines: 'data = receive_data(CONNTRANSPORT)' and 'if data[0] == TRANSPORTRECV:'.
-The CoVi controller is equipped with two buttons, red and green, to be used without receiving a message from an external device. Therefore, in the state 'waiting for plate' in function run_covi(), make sure the following two lines 'data = receive_data(CONNEXTERN)' and 'if data[0] == EXTERNRECV:' are deleted or commented.
+To be used in production, the controller will start when it receives a message from the transport system. Before using this controller, change the variable 'TRANSPORTRECV' to the expected message the controller will receive. In the state 'waiting for plate' in function run_covi() uncomment the following two lines: 'transportdata = receive_data(CONNTRANSPORT)' and 'if transportdata[0] == TRANSPORTRECV:'.
+The CoVi controller is equipped with two buttons, red and green, to be used without receiving a message from an external device. Therefore, in the state 'waiting for plate' in function run_covi(), make sure the following two lines 'transportdata = receive_data(CONNTRANSPORT)' and 'if transportdata[0] == TRANSPORTRECV:' are deleted or commented.
 Pushing the green button interrupts the controller and will run the function run_covi(). While running, the LED is turned on.
 Pushing the red button interrupts the controller and will stop the function run_covi(). The LED will turn off.
 
@@ -94,7 +94,10 @@ def receive_data(sock):
     while True:
         try:
             data = sock.recv(1024)
-            fragments.append(data.decode().replace(" ", "").split(","))
+            fragments.append(data
+                             .decode()
+                             .replace(" ", "")
+                             .split(","))
         except TimeoutError:
             return fragments
 
@@ -179,15 +182,15 @@ def run_covi(status):
         while runApp:
             match status:
                 case 'waiting for plate':
+                    #transportdata = receive_data(CONNTRANSPORT)
+                    #if transportdata[0] == TRANSPORTRECV:
                     status = 'plate arrived'
                 case 'plate arrived':
                     sendmsg(CONNOMRON, MEASURE)
                     data = receive_data(CONNOMRON)
-                    if data[0][0] == 'OK\r' and data[MEASUREDDATA][0] != 'OK':
+                    if data[0][0] == 'OK\r':
                         status = 'unaligned'
                 case 'unaligned':
-                    sendmsg(CONNOMRON, MEASURE)
-                    data = receive_data(CONNOMRON)
                     print(data[MEASUREDDATA])
                     if data[1][0] == 'OK':
                         runApp = False
@@ -218,3 +221,4 @@ if __name__ == '__main__':
         #CONNSCREENPRINT.close()
         SERIAL.close()
     GPIO.cleanup()
+    
