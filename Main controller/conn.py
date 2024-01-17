@@ -16,7 +16,7 @@ def conn_init():
     CONNOMRON.settimeout(1)
     CONNOMRON.connect((OMRONCONTROLLER[0], OMRONCONTROLLER[1]))
     sendmsg(CONNOMRON, LAYOUT)
-    #measure()
+    measure()
     #CONNTRANSPORT.settimeout(1)
     #CONNTRANSPORT.connect((TRANSPORT[0], TRANSPORT[1]))
     #CONNSCREENPRINT.settimeout(1)
@@ -58,7 +58,7 @@ def read_serial():
 
 def measure():
     sendmsg(CONNOMRON, MEASURE)
-    time.sleep(0.5)
+    time.sleep(2)
 
 def aligned():
     sendmsg(CONNSCREENPRINT, 'OK')
