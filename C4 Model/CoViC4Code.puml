@@ -1,0 +1,13 @@
+@startuml CoViCode
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
+
+skinparam classAttributeIconSize 0
+
+class Covi{
+    -measureddata
+    
+
+}
+
+
+@enduml

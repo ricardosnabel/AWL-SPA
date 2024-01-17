@@ -2,25 +2,38 @@
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
-title CoVi C4 System Component diagram
+title CoVi C4 Component diagram
 
-System_Ext(transport, "Transport", "Transport system providing BiPolar Plates")
-System_Ext(screenprint, "Screen printing", "Screen Printing module")
+System_Ext(transport, "Transport", "Transport system providing BiPolar Plates.")
+System_Ext(screenprint, "Screen printing", "Screen Printing module.")
 
-System_Boundary(covi, "CoVi Controller"){
-    Component(connection, "Connection", "Socket", "Creates a connection between other devices.")
-    Component(convert, "Convertion", "Python", "Converts the incoming data.")
-    Component(movement, "Movement", "Python", "Calculates the movement.")
-    Component(run, "Application", "Python", "Run the application.")
+System_Boundary(coviController, "CoVi Controller"){
+    Component(convert, "Convertion", "Python", "Converts the distance from pixels to the amount of steps.")
+    Component(movement, "Movement", "Python", "Calculates the movement for each actuator.")
 }
 
-BiRel(transport, connection, "")
-BiRel(screenprint, connection, "")
-Rel(covi, connection, "")
-Rel(covi, run, "")
-Rel(run, movement, "")
-Rel(movement, convert, "")
-Rel(movement, connection, "")
+System_Boundary(omronController, "Omron Controller"){
+    Component(camera, "Camera", "Vision", "Takes a foto of the plate.")
+    Component(shapesearch, "Shape Search III", "Vision", "'Sees' the plate and returns the coördinates.")
+    Component(calcution, "Calculation", "Vision", "Calculates the distance between the reference point and the measured coördinates of the plate.")
+}
+
+System_Boundary(actuatorController, "Actuator Controller"){
+    Component(pulsesignal, "Pulse Signal", "C", "Sends the steps in pulses to the actuators.")
+    Component(actuators, "Actuators", "", "Moves the distance received in electric pulses.")
+}
+
+BiRel(transport, coviController, "New plate arrived; Plate is ready to go.")
+BiRel(screenprint, coviController, "Plate is aligned; Screen printing is done.")
+
+BiRel(movement, convert, "Data in pixels; Data in steps.")
+
+BiRel(coviController, omronController, "Measure plate; Measurement data.")
+Rel(camera, shapesearch, "Taken image.")
+Rel(shapesearch, calcution, "Measured coördinations.")
+
+Rel(coviController, actuatorController, "Distance to move actuators.")
+Rel(pulsesignal, actuators, "Electric pulses.")
 
 SHOW_LEGEND()
 

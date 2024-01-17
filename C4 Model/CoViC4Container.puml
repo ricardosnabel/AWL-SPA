@@ -2,23 +2,21 @@
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
-title CoVi C4 System Container diagram
+title CoVi C4 Container diagram
 
 System_Ext(transport, "Transport", "Transport system providing BiPolar Plates")
 System_Ext(screenprint, "Screen printing", "Screen Printing module")
 
-System(covi, "CoVi")
-
 System_Boundary(covi, "CoVi"){
     Container(coviController, "CoVi Controller", "Python")
-    Container(omronController, "Omron Controller", "Omron Vision")
-    Container(actuatorController, "Actuator Controller", "C/C++")
+    Container(omronController, "Omron Controller", "Omron Vision", "Measures the distance between the reference points and the coördinates of the BiPolar Plate.")
+    Container(actuatorController, "Actuator Controller", "C", "Sends the amount of steps to the actuators in pulses.")
 }
 
-BiRel(transport, coviController, "")
-BiRel(coviController, screenprint, "")
-BiRel(coviController, omronController, "")
-Rel(coviController, actuatorController, "")
+BiRel(transport, coviController, "New plate arrived; Plate is ready to go")
+BiRel(coviController, screenprint, "Plate is aligned; Screen printing is done")
+BiRel(coviController, omronController, "Measure plate; Measurement data")
+Rel(coviController, actuatorController, "Distance to move actuators")
 
 SHOW_LEGEND()
 

@@ -9,8 +9,8 @@ System_Ext(screenprint, "Screen printing")
 
 System(covi, "CoVi")
 
-BiRel(transport, covi, "")
-BiRel(covi, screenprint, "")
+BiRel(transport, covi, "New plate arrived; Plate is ready to go")
+BiRel(covi, screenprint, "Plate is aligned; Screen printing is done")
 
 SHOW_LEGEND()
 
