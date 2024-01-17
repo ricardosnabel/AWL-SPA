@@ -16,7 +16,7 @@ def run_covi(status):
                 case 'unaligned':
                     measure()
                     data = omron_recv()
-                    print(data[MEASUREDDATA])
+                    print(data)
                     if data[0][0] == 'OK\r':
                         status = 'aligning'
                 case 'aligning':
