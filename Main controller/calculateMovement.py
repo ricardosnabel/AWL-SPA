@@ -17,7 +17,6 @@ def convert_pixels2steps(data):
         for i in data:
             distInUm = PIXELSIZE * float(i)
             stepsToTake.append(maxsteps_check(distInUm / STEPSIZE))
-    print("StepsToTake: ", stepsToTake)
     return stepsToTake
 
 def maxsteps_check(steps):
@@ -33,14 +32,11 @@ def move_actuator(data):
         if YDiff > 4:
             data[YAXISCAM0] = float(data[YAXISCAM0]) * (abs(float(data[YAXISCAM0])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             data[YAXISCAM2] = float(data[YAXISCAM2]) * (abs(float(data[YAXISCAM2])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
-            print(data[YAXISCAM2])
-            print(data[YAXISCAM0])
             stepsToTake = convert_pixels2steps(data)
             stepsToTake[YAXISCAM0] /= 1.92
             stepsToTake[YAXISCAM2] /= 1.92
         write_to_serial(stepsToTake[YAXISCAM0])
         write_to_serial(stepsToTake[YAXISCAM2])
-        print("Steps: ", stepsToTake)
     else:
         write_to_serial(0)
         write_to_serial(0)
