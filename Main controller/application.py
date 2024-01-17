@@ -7,7 +7,7 @@ TRANSPORTRECV = 'OK\r'                                                      # Me
 
 def run_covi(status):
     while True:
-        while get_runApp:
+        while get_runApp == True:
             match status:
                 case 'waiting for plate':
                     #transportdata = transport_recv()
