@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 LED = 11                                                                    # GPIO pin for the LED
 REDBUTTON = 16                                                              # GPIO pin for the red button
 GREENBUTTON = 15                                                            # GPIO pin for the green button
-runApp = 0                                                                  # Boolean variable to start (True) and stop (False) the controller
+runApp = False                                                              # Boolean variable to start (True) and stop (False) the controller
 
 def GPIO_init():
     GPIO.setmode(GPIO.BOARD)
