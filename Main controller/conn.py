@@ -58,6 +58,7 @@ def read_serial():
 
 def measure():
     sendmsg(CONNOMRON, MEASURE)
+    time.sleep(0.5)
 
 def aligned():
     sendmsg(CONNSCREENPRINT, 'OK')
