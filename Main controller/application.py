@@ -2,7 +2,7 @@ from conn import measure, aligned, omron_recv, transport_recv, screenprint_recv
 from calculateMovement import move_actuator
 from gpio import get_runApp, set_runApp
 
-MEASUREDDATA = 2                                                            # Index for the measurement data received from the Omron controller
+MEASUREDDATA = 1                                                            # Index for the measurement data received from the Omron controller
 TRANSPORTRECV = 'OK\r'                                                      # Message to receive to run the controller
 
 def run_covi(status):

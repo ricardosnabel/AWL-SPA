@@ -17,6 +17,8 @@ def conn_init():
     CONNOMRON.settimeout(1)
     CONNOMRON.connect((OMRONCONTROLLER[0], OMRONCONTROLLER[1]))
     sendmsg(CONNOMRON, LAYOUT)
+    measure()
+    omron_recv()
     #CONNTRANSPORT.settimeout(1)
     #CONNTRANSPORT.connect((TRANSPORT[0], TRANSPORT[1]))
     #CONNSCREENPRINT.settimeout(1)
@@ -34,11 +36,9 @@ def sendmsg(sock, message):
 def receive_data(sock):
     try:
         data = sock.recv(1024).decode().replace(" ", "").split("\r")
-        print(data)
         fragment = []
         for i in range(len(data)):
             fragment.append(re.split(',', data[i]))
-        #fragments.append(data.split(","))
         return fragment
     except TimeoutError:
         return "ERR"
@@ -58,7 +58,6 @@ def read_serial():
 
 def measure():
     sendmsg(CONNOMRON, MEASURE)
-    time.sleep(2)
 
 def aligned():
     sendmsg(CONNSCREENPRINT, 'OK')
