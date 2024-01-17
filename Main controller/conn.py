@@ -40,7 +40,7 @@ def receive_data(sock):
             fragments.append(data
                              .decode()
                              .replace(" ", "")
-                             .split(","))
+                             .split(",").split("\r"))
         except TimeoutError:
             return fragments
 
