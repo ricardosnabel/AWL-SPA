@@ -2,7 +2,7 @@ from conn import measure, aligned, omron_recv, transport_recv, screenprint_recv
 from calculateMovement import move_actuator
 from gpio import get_runApp, set_runApp
 
-MEASUREDDATA = 1                                                            # Index for the measurement data received from the Omron controller
+MEASUREDDATA = 2                                                            # Index for the measurement data received from the Omron controller
 TRANSPORTRECV = 'OK\r'                                                      # Message to receive to run the controller
 
 def run_covi(status):
@@ -17,10 +17,10 @@ def run_covi(status):
                     measure()
                     data = omron_recv()
                     print(data)
-                    if data[1][0] != 'ERR\r':
+                    if data[MEASUREDDATA][0] != 'ERR\r':
                         status = 'aligning'
                 case 'aligning':
-                    if data[1][0] == 'OK':
+                    if data[MEASUREDDATA][0] == 'OK':
                         set_runApp(False)
                         status = 'unaligned'
                     else:
