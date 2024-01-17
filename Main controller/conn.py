@@ -37,9 +37,9 @@ def receive_data(sock):
         print(data)
         fragment = []
         for i in range(len(data)):
-            fragment.append(re.split(',', str(i)))
+            re.split(',', data[i])
         #fragments.append(data.split(","))
-        return fragment
+        return data
     except TimeoutError:
         return "ERR"
 
