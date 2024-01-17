@@ -1,6 +1,7 @@
 import socket
 import serial
 import time
+import re
 
 MEASURE = 'M'                                                               # Command to run a measurement on the Omron controller
 LAYOUT = 'DLN 0 1'                                                          # Set layout command for the Omron controller 
@@ -37,10 +38,8 @@ def receive_data(sock):
         try:
             data = sock.recv(1024)
             print(data)
-            fragments.append(data
-                             .decode()
-                             .replace(" ", "")
-                             .split(",").split("\r"))
+            re.split("\r |, ", data.decode().replace(" ", ""))
+            fragments.append(data)
         except TimeoutError:
             return fragments
 
