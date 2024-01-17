@@ -34,15 +34,14 @@ def sendmsg(sock, message):
 
 def receive_data(sock):
     fragments = []
-    while True:
-        try:
-            data = sock.recv(1024).decode().replace(" ", "")
-            print(data)
-            re.split("\r |, ", data)
-            fragments.append(data.split(","))
-            return fragments
-        except TimeoutError:
-            return fragments
+    try:
+        data = sock.recv(1024).decode().replace(" ", "")
+        print(data)
+        re.split("\r |, ", data)
+        fragments.append(data.split(","))
+        return fragments
+    except TimeoutError:
+        return fragments
 
 def write_to_serial(data):
     time.sleep(2)
