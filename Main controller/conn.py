@@ -38,7 +38,8 @@ def receive_data(sock):
         try:
             data = sock.recv(1024).decode().replace(" ", "")
             print(data)
-            fragments.append(re.split("\r |, ", data))
+            re.split("\r |, ", data)
+            fragments.append(data.split(","))
             return fragments
         except TimeoutError:
             return fragments
