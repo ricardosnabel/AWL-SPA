@@ -8,7 +8,7 @@ TRANSPORTRECV = 'OK\r'                                                      # Me
 def run_covi(status):
     while True:
         print(get_runApp)
-        while get_runApp == True:
+        while get_runApp > 0:
             match status:
                 case 'waiting for plate':
                     #transportdata = transport_recv()
@@ -22,7 +22,7 @@ def run_covi(status):
                         status = 'aligning'
                 case 'aligning':
                     if data[1][0] == 'OK':
-                        set_runApp()
+                        set_runApp(1)
                         status = 'unaligned'
                     else:
                         move_actuator(data[MEASUREDDATA])
