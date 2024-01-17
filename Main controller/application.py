@@ -22,10 +22,10 @@ def run_covi(status):
                 case 'aligning':
                     if data[MEASUREDDATA][0] == 'OK':
                         set_runApp(False)
-                        status = 'unaligned'
+                        status = 'aligned'
                     else:
                         move_actuator(data[MEASUREDDATA])
-                        state = 'plate arrived'
+                        status = 'unaligned'
                 case 'aligned':
                     #aligned()
                     status = 'wait for screen print'
