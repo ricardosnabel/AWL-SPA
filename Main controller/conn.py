@@ -33,12 +33,11 @@ def sendmsg(sock, message):
     sock.send(message.encode())
 
 def receive_data(sock):
-    
+    fragments = []
     try:
-        data = sock.recv(1024).decode().replace(" ", "")
+        data = sock.recv(1024).decode().replace(" ", "").split("\r")
         print(data)
-        re.split("\r |, ", data)
-        fragments = []
+        #re.split("\r |, ", data)
         fragments.append(data.split(","))
         return fragments
     except TimeoutError:
