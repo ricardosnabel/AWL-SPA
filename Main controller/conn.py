@@ -36,6 +36,7 @@ def receive_data(sock):
     while True:
         try:
             data = sock.recv(1024)
+            print(data)
             fragments.append(data
                              .decode()
                              .replace(" ", "")
