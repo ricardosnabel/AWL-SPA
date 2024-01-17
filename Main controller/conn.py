@@ -17,7 +17,6 @@ def conn_init():
     CONNOMRON.settimeout(1)
     CONNOMRON.connect((OMRONCONTROLLER[0], OMRONCONTROLLER[1]))
     sendmsg(CONNOMRON, LAYOUT)
-    measure()
     #CONNTRANSPORT.settimeout(1)
     #CONNTRANSPORT.connect((TRANSPORT[0], TRANSPORT[1]))
     #CONNSCREENPRINT.settimeout(1)
