@@ -31,7 +31,7 @@ void setup() {
   pinMode(pulPinX, OUTPUT);
   pinMode(enaPinX, OUTPUT);
 
-  stepper_innit();
+  stepperInnit();
 
   digitalWrite(enaPinY2, true);
   digitalWrite(enaPinY1, true);
@@ -42,7 +42,7 @@ void setup() {
   cam = 0;
 }
 
-void stepper_innit(){
+void stepperInnit(){
   stepperX1.setMaxSpeed(3200);
   stepperX1.setAcceleration(400);
   stepperX1.setSpeed(3200);
@@ -54,16 +54,15 @@ void stepper_innit(){
   stepperY.setSpeed(3200);
 }
 
-void step_direction(int steps, int dirPin){
+void stepDirection(int steps, int dirPin){
     if (steps > 0)
       digitalWrite(dirPin, true);
     else
       digitalWrite(dirPin, false);
 }
 
-void PulseSignal(int steps, int enaPin, int dirPin){
-  print_serial("Steps: ", steps);
-  step_direction(steps, dirPin);
+void pulseSignal(int steps, int enaPin, int dirPin){
+  stepDirection(steps, dirPin);
   digitalWrite(enaPin, false);
   if (enaPin == enaPinY1){
     stepperX1.moveTo(steps);
@@ -84,15 +83,15 @@ void PulseSignal(int steps, int enaPin, int dirPin){
   digitalWrite(enaPin, true);
 }
 
-void print_serial(int data){
+void printSerial(int data){
   Serial.println(data);
 }
 
-void print_serial(String data){
+void printSerial(String data){
   Serial.println(data);
 }
 
-void print_serial(String txtData, int numData){
+void printSerial(String txtData, int numData){
   Serial.print(txtData);
   Serial.println(numData);
 }
@@ -139,8 +138,7 @@ void loop() {
         status = 1;
         break;
       }
-      //print_serial("enaPin: ", enaPin);
-      PulseSignal(cam[index], enaPin, dirPin);
+      pulseSignal(cam[index], enaPin, dirPin);
       status = 1;
       break;
   }

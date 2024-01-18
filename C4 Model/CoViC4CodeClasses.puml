@@ -1,10 +1,68 @@
 @startuml CoViCode
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
 
-class conn {
+title CoVi C4 Code diagram
 
+class conn {
+    {static} MEASURE
+    {static} LAYOUT
+    {static} CONNOMRON
+    {static} CONNTRANSPORT
+    {static} CONNSCREENPRINT
+    {static} SERIAL
+    {static} OMRONCONTROLLER
+    {static} TRANSPORT
+    {static} SCREENPRINT
+
+    conn_init()
+    conn_close()
+    sendmsg(sock, message)
+    receive_data(sock)
+    write_to_serial(data)
+    measure()
+    aligned()
+    omron_recv()
+    transport_recv()
+    screenprint_recv()
 }
 
-class 
+class application {
+    {static} MEASUREDDATA
+    {static} TRANSPORTRECV
+
+    run_covi(status)
+}
+
+class gpio {
+    {static} LED
+    {static} REDBUTTON
+    {static} GREENBUTTON
+    runApp
+
+    GPIO_init()
+    handle_buttonINT(channel)
+    set_runApp(state)
+    get_runApp()
+    clean_gpio()
+}
+
+class calculateMovement {
+    {static} XAXISCAM0
+    {static} YAXISCAM0
+    {static} XAXISCAM2
+    {static} YAXISCAM2
+    {static} PIXELSIZE
+    {static} STEPSIZE
+    {static} MAXSTEPS
+
+    convert_pixels2steps(data)
+    maxsteps_check(steps)
+    move_actuator(data)
+}
+
+class main
+
+
+
 
 @enduml

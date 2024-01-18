@@ -1,26 +1,25 @@
 @startuml OmronController
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
 
-class CameraImageInput
-class ShapeSearchIII
-class Resultoutput
-class Dataoutput
+state "Plate holes seen?" as holescheck
+state "Difference <= 4?" as differencecheck
 
-CameraImageInput : SC.MEASURED.X.POSITION0#
-CameraImageInput : SC.MEASURED.Y.POSITION0#
-CameraImageInput : SC.MEASURED.X.POSITION2#
-CameraImageInput : SC.MEASURED.Y.POSITION2#
-Dataoutput : SY.REFERENCE.X.POSITION0#
-Dataoutput : SY.REFERENCE.Y.POSITION0#
-Dataoutput : SY.REFERENCE.X.POSITION2#
-Dataoutput : SY.REFERENCE.Y.POSITION2#
-Dataoutput : SC.MEASURED.X.POSITION0#
-Dataoutput : SC.MEASURED.Y.POSITION0#
-Dataoutput : SC.MEASURED.X.POSITION2#
-Dataoutput : SC.MEASURED.Y.POSITION2#
-ShapeSearchIII : SC.MEASURED.X.POSITION0#
-ShapeSearchIII : SC.MEASURED.Y.POSITION0#
-ShapeSearchIII : SC.MEASURED.X.POSITION2#
-ShapeSearchIII : SC.MEASURED.Y.POSITION2#
+state "Camera Image Input" as camerainput : do / Take photo
+state "Shape Search III" as shapesearchIII : do / Determine position
+state "Get error" as resulterror : do / Result output
+state "Plate aligned" as resultoutput : do / Result output
+state "Send difference" as dataoutput : do / Calculate difference
+dataoutput : do / Data output
+
+[*] --> camerainput
+camerainput --> shapesearchIII
+shapesearchIII --> holescheck
+holescheck --> differencecheck : Yes
+holescheck --> resulterror : No
+differencecheck --> dataoutput : No
+differencecheck --> resultoutput : Yes
+dataoutput --> [*]
+resultoutput --> [*]
+resulterror --> [*]
 
 @enduml

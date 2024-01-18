@@ -3,38 +3,57 @@
 
 state coviController{
     state "Waiting for plate" as waitforplate {
-    }
-    state "Plate arrived" as platearrived {
+        state "Wait for message" as transportrecv : entry / transport_recv
+        state "Check message" as transportcheck
 
+        transportrecv --> transportcheck : Message received
+        transportcheck --> unaligned : New plate arrived
+        transportcheck --> transportrecv : No plate arrived
     }
     state "Unaligned" as unaligned {
-        state calculateMovement
-    }
-    state "Aligned" as aligned
-    state "Wait for screen print" as waitforscreenprint
-    state "Return to neutral" as returntoneutral {
+        state "Send measure command" as omronsendmeasure : do / measure
+        state "Receive measurement" as omronrecvmeasure : entry / omron_recv
+        state "Measurement check" as omroncheck
 
+        omronsendmeasure --> omronrecvmeasure : Send measure command
+        omronrecvmeasure --> omroncheck : Received data
+        omroncheck --> aligning : Measurement successful
+        omroncheck --> omronsendmeasure : Measurement not successful
+    }
+    state "Aligning" as aligning {
+        state "Plate aligned?" as alignedcheck : do / set_runApp(False)
+        state "Calculate movement" as calculatemovement{
+            state "Convert data" as convertdata : do / convert_pixels2steps
+            convertdata : do / maxsteps_check
+            state "Plate rotated?" as rotationcheck
+            state "Calculate movement" as rotationcalc
+            state "Send steps" as actuatorsend : do / write_to_serial(steps)
+
+            convertdata --> rotationcheck : Data converted
+            rotationcheck --> rotationcalc : Plate rotated
+            rotationcalc --> actuatorsend : Rotation calculated
+            rotationcheck --> actuatorsend : Plate not rotated
+        }
+        
+        alignedcheck --> calculatemovement : Plate not aligned
+        calculatemovement --> alignedcheck : Plate moved
     }
 
-    state communicateTransport
-    state communicateOmron
-    state communicateActuator
-    state communicateScreenPrint
-    state convertData
+    state "Aligned" as aligned : do / aligned
+    state "Wait for screen print" as waitforscreenprint : entry / screenprint_recv
+    state "Return to neutral" as returntoneutral
 
     [*] --> waitforplate
-    waitforplate --> platearrived : New plate arrived
-    platearrived --> unaligned : Plate is not aligned
-    unaligned --> aligned : Plate is aligned
-    aligned --> waitforscreenprint : Message screen printing module
-    waitforscreenprint --> returntoneutral : Screen printing is done
-
+    alignedcheck --> aligned : Plate aligned
+    aligned --> waitforscreenprint : Message send
+    waitforscreenprint --> returntoneutral : Screen print done
+    returntoneutral --> [*]
 }
 
 state greenButtonPressed
 state redButtonPressed
 
-greenButtonPressed --> coviController : Starts the application
-redButtonPressed --> coviController : Stops the application
+greenButtonPressed --> coviController : Start the application
+redButtonPressed --> coviController : Stop the application
 
 @enduml

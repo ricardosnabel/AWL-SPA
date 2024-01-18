@@ -1,0 +1,19 @@
+@startuml ActuatorController
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
+
+state "Wait for start" as waitdata : entry / Serial.readString
+state "Receive data" as datareceive : entry / Serial.readString
+state "Set pins" as pinset : do / enaPin = enable pin motor
+pinset : do / dirPin = direction pin motor
+state "Send pulse" as pulsesignal : do / pulseSignal
+pulsesignal : do / stepDirection
+
+
+[*] --> waitdata
+waitdata --> datareceive : Received "start"
+datareceive --> [*] : Received "end"
+datareceive --> pinset : Received steps
+pinset --> pulsesignal : Pins set
+pulsesignal --> [*] : Moved motors
+
+@enduml
