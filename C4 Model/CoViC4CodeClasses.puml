@@ -1,7 +1,7 @@
 @startuml CoViCode
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
 
-title CoVi C4 Code diagram
+title CoVi C4 Class diagram
 
 class conn {
     {static} MEASURE

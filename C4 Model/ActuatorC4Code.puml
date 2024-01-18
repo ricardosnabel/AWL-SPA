@@ -1,6 +1,8 @@
 @startuml ActuatorController
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
 
+title Actuator C4 State diagram
+
 state "Wait for start" as waitdata : entry / Serial.readString
 state "Receive data" as datareceive : entry / Serial.readString
 state "Set pins" as pinset : do / enaPin = enable pin motor

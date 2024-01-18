@@ -1,6 +1,8 @@
 @startuml CoViCode
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
 
+title CoVi C4 State diagram
+
 state coviController{
     state "Waiting for plate" as waitforplate {
         state "Wait for message" as transportrecv : entry / transport_recv

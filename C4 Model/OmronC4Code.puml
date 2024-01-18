@@ -1,6 +1,8 @@
 @startuml OmronController
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
 
+title Omron C4 State diagram
+
 state "Plate holes seen?" as holescheck
 state "Difference <= 4?" as differencecheck
 
