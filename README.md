@@ -4,14 +4,14 @@ Usage of this controller requires Python 3 or higher. To install go to https://w
 This controller use the pySerial package. If there will be no use of any serial connection, please comment or remove 'import serial' and the functions write_to_serial() and read_serial(). To install this package, follow the instructions in the link in chapter Serial.
 
 Set up a connection:
-    Telnet:
+Telnet:
     This controller sets a connection between the Omron Vision controller and the CoVi controller. May the IP address of the Omron controller be changed, please change the address in the first element of the 'OMRONCONTROLLER' array. To change the port, use the second element in this array.
     It is also possible to set up an connection with the transport system and screen printing module, therefore it is necessary to insert the IP addresses in the first element of the 'TRANSPORT' and 'SCREENPRINT' array and uncomment all the lines using the 'CONNTRANSPORT' and 'CONNSCREENPRINT' command. To change the port, use the second element in these arrays.
     To send data, use the sendmsg() function. This function requires the socket of the connection to which the data needs to be transmitted to and the message that will be sent.   
     To receive data, use the receive_data() function. This function requires the socket of the connection from which the data needs to be received.
     For more information, see the documentation of the socket library: https://docs.python.org/3/library/socket.html
 
-    Serial:
+Serial:
     Before using this controller, it is required to install the package pySerial. To install this package, follow the instructions in the link below.
     This controller sets a serial connection between the Actuator controller and the CoVi controller. Before using this controller, check and/or change the port on which the Actuator controller is connected to in the variable SERIAL.
     To send data, use the write_to_serial() function. This function requires the message that will be sent to the Actuator controller.
