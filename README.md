@@ -4,6 +4,7 @@ Usage of this controller requires Python 3 or higher. To install go to https://w
 This controller use the pySerial package. If there will be no use of any serial connection, please comment or remove 'import serial' and the functions write_to_serial() and read_serial(). To install this package, follow the instructions in the link in chapter Serial.
 
 Set up a connection:
+
 Telnet:
     This controller sets a connection between the Omron Vision controller and the CoVi controller. May the IP address of the Omron controller be changed, please change the address in the first element of the 'OMRONCONTROLLER' array. To change the port, use the second element in this array.
     It is also possible to set up an connection with the transport system and screen printing module, therefore it is necessary to insert the IP addresses in the first element of the 'TRANSPORT' and 'SCREENPRINT' array and uncomment all the lines using the 'CONNTRANSPORT' and 'CONNSCREENPRINT' command. To change the port, use the second element in these arrays.
