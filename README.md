@@ -19,6 +19,8 @@ Serial:
     To receive data, use the read_serial() function.
     For more information, see the documentation of the pySerial library: https://pyserial.readthedocs.io/en/latest/pyserial.html
 
+
+
 Omron controller:
 To measure, send the message in the variable 'MEASURE' using the function sendmsg(). To change the layout of the Omron, send the message in the variable 'LAYOUT' using the function sendmsg(). To change the layout, change the second number in the variable 'LAYOUT' to the required layout.
 Data from the Omron controller will be stored in an array. The first element of this array contains the execution message in the form of an 'OK\r' (may the command be executed succesfully) or 'ERR\r' (may an error occured while executing the command), the second element contains the data from the Omron controller in the form of an 'READY\r' (the plate has been aligned succesfully) or a array containing the measurement values (example: [XAXISCAM0, YAXISCAM0, XAXISCAM2, YAXISCAM2]).
