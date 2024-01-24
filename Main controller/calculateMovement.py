@@ -28,11 +28,15 @@ def move_actuator(data):
     write_to_serial("start")
     YDiff = abs(float(data[YAXISCAM0]) - float(data[YAXISCAM2]))
     stepsToTake = convert_pixels2steps(data)
+    # Check if the plate is not aligned on the Y axis
     if abs(float(data[YAXISCAM0])) > 2.5 or abs(float(data[YAXISCAM2])) > 2.5:
+        # Check if the plate is rotated
         if YDiff > 4:
+            # Calculate the movement of each Y motor. To prevent overshooting, the ratio between the two measurements will be calculated and the amount of steps will be set according to this ratio.
             data[YAXISCAM0] = float(data[YAXISCAM0]) * (abs(float(data[YAXISCAM0])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             data[YAXISCAM2] = float(data[YAXISCAM2]) * (abs(float(data[YAXISCAM2])) / (abs(float(data[YAXISCAM0])) + abs(float(data[YAXISCAM2]))))
             stepsToTake = convert_pixels2steps(data)
+            # Prevent the motors from overshooting
             stepsToTake[YAXISCAM0] /= 1.92
             stepsToTake[YAXISCAM2] /= 1.92
         write_to_serial(stepsToTake[YAXISCAM0])

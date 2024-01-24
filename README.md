@@ -1,3 +1,11 @@
+The system contains two controllers. The motor controller and the CoVi controller.
+In the folder 'Main controller' you will find a set of Python scripts: 
+application.py - This script will run the CoVi application and control the states of the application.
+calculateMovement.py - This script contains all the calculations used. This will convert the incoming data in pixels to the amount of steps each motor needs to take.
+conn.py - This script manage all connections.
+gpio.py - This script manage the button inputs.
+main.py - This script manage the begin and closing of the application and connections.
+
 How to use the CoVi controller.
 
 Usage of this controller requires Python 3 or higher. To install go to https://www.python.org/downloads/ 
