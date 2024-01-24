@@ -6,6 +6,8 @@ conn.py - This script manage all connections.
 gpio.py - This script manage the button inputs.
 main.py - This script manage the begin and closing of the application and connections.
 
+In the folder 'Actuator controller' you will find the code file for the Arduino Uno. Here the motors will be managed.
+
 How to use the CoVi controller.
 
 Usage of this controller requires Python 3 or higher. To install go to https://www.python.org/downloads/ 
